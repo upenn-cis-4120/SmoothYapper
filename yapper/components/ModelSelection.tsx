@@ -4,10 +4,10 @@ import { useEffect, useState, Dispatch, SetStateAction } from "react";
 const { ColorsPalette } = require("@/constants/colors.tsx");
 
 type Props = {
-    setSelectedModal: Dispatch<SetStateAction<{ id: number; name: string; favoriteFood: string; age: number; avatar: any; scenario: string; } | undefined>>;
+    setSelectedModel: Dispatch<SetStateAction<{ id: number; name: string; favoriteFood: string; age: number; avatar: any; scenario: string; } | undefined>>;
 }
 
-export default function ModalSelection({setSelectedModal} : Props) {
+export default function ModdlSelection({setSelectedModel} : Props) {
     const [propertiesList, setPropertiesList] = useState<{ id: number; name: string; favoriteFood: string; age: number; avatar: any; scenario: string; }[]>([]);
     const [index, setIndex] = useState<number>(0);
 
@@ -38,15 +38,15 @@ export default function ModalSelection({setSelectedModal} : Props) {
         ];
         setPropertiesList(monkResponse);
         setIndex(0);
-        setSelectedModal(monkResponse[0]);
+        setSelectedModel(monkResponse[0]);
     }
     , []);
 
     useEffect(() => {
         if (propertiesList.length > 0) {
-            setSelectedModal(propertiesList[index]);
+            setSelectedModel(propertiesList[index]);
         }
-    }, [index, propertiesList, setSelectedModal]);
+    }, [index, propertiesList, setSelectedModel]);
 
     const handlePrevious = () => {
         setIndex((prevIndex) => (prevIndex - 1 + propertiesList.length) % propertiesList.length);

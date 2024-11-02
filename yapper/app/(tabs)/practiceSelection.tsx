@@ -2,13 +2,13 @@ import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
 import { useEffect, useState } from "react";
 import { MaterialIcons } from "@expo/vector-icons";
 
-import ModalSelection from "@/components/ModalSelection";
+import ModelSelection from "@/components/ModelSelection";
 
 const { ColorsPalette } = require("@/constants/colors.tsx");
 
 export default function practiceSelection() {
     const [points, setPoints] = useState<number>(0);
-    const [selectedModal, setSelectedModal] = useState<{id: number; name: string; favoriteFood: string; age: number; avatar: any; scenario: string;} | undefined>(undefined);
+    const [selectedModel, setSelectedModel] = useState<{id: number; name: string; favoriteFood: string; age: number; avatar: any; scenario: string;} | undefined>(undefined);
 
     useEffect(() => {
         // Fetch data from the server
@@ -23,11 +23,11 @@ export default function practiceSelection() {
     return (
         <View style={styles.componentWrapper}>
             <Text>Overall Poins {points}</Text>
-            <ModalSelection setSelectedModal={setSelectedModal}/>
+            <ModelSelection setSelectedModel={setSelectedModel}/>
             <TouchableOpacity style={styles.playButton} onPress={
                 ()=> {
                     console.log("Play button pressed");
-                    console.log(selectedModal);
+                    console.log(selectedModel);
                 }
             }>
                 <MaterialIcons name="play-circle-outline" size={128} color={ColorsPalette.PrimaryColorLight}  />
