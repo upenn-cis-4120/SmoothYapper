@@ -1,9 +1,16 @@
 import { Tabs } from "expo-router";
 import { MaterialIcons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { useTabContext } from "@/contexts/TabContext";
 
 const { ColorsPalette } = require("@/constants/colors.tsx");
 
 export default function TabLayout() {
+    const tabContext = useTabContext();
+    if (!tabContext) {
+        throw new Error("useTabContext must be used within a TabProvider");
+    }
+    const { activeTab, setActiveTab } = tabContext;
+    
     return (
         <Tabs screenOptions={{
             tabBarActiveTintColor: ColorsPalette.SecondaryColorDeep,
@@ -18,33 +25,66 @@ export default function TabLayout() {
             },
         }}>
 
-            <Tabs.Screen name="index" options={{
-                title: "Home",
-                tabBarIcon: ({ color, focused }) => (
-                    <MaterialIcons name={ focused ? "mic" : "mic-none"} size={64} color={color} />
-                )
-            }}/>
+            <Tabs.Screen 
+                name="index" 
+                options={{
+                    title: "Home",
+                    tabBarIcon: ({ color, focused }) => (
+                        <MaterialIcons name={ focused || (activeTab === "Home") ? "mic" : "mic-none"} size={64} color={activeTab === "Home" ? ColorsPalette.SecondaryColorDeep : color} />
+                    )
+                }}
+                listeners= {{
+                    focus: () => setActiveTab("Home"),
+                }}
+            />
 
-            <Tabs.Screen name="learn" options={{
-                title: "Learn",
-                tabBarIcon: ({ color, focused }) => (
-                    <MaterialCommunityIcons name={ focused ? "book-multiple" : "book-multiple-outline"} size={64} color={color} />
-                )
-            }}/>
+            <Tabs.Screen 
+                name="learn" 
+                options={{
+                    title: "Learn",
+                    tabBarIcon: ({ color, focused }) => (
+                        <MaterialCommunityIcons name={ focused ? "book-multiple" : "book-multiple-outline"} size={64} color={color} />
+                    ),
+                }} 
+                listeners= {{
+                    focus: () => setActiveTab("Learn"),
+                }}
+            />
 
-            <Tabs.Screen name="topic" options={{
-                title: "Topic",
-                tabBarIcon: ({ color, focused }) => (
-                    <MaterialCommunityIcons name={ focused ? "chat-processing" : "chat-processing-outline" } size={64} color={color} />
-                )
-            }}/>
+            <Tabs.Screen 
+                name="topic" 
+                options={{
+                    title: "Topic",
+                    tabBarIcon: ({ color, focused }) => (
+                        <MaterialCommunityIcons name={ focused ? "chat-processing" : "chat-processing-outline" } size={64} color={color} />
+                    ),
+                }}
+                listeners= {{
+                    focus: () => setActiveTab("Topic"),
+                }}
+            />
 
-            <Tabs.Screen name="setting" options={{
-                title: "Setting",
-                tabBarIcon: ({ color, focused }) => (
-                    <MaterialIcons name={ "settings" } size={64} color={color} />
-                )
-            }}/>
+            <Tabs.Screen 
+                name="setting" 
+                options={{
+                    title: "Setting",
+                    tabBarIcon: ({ color, focused }) => (
+                        <MaterialIcons name={ "settings" } size={64} color={color} />
+                    ),
+                }}
+                listeners= {{
+                    focus: () => setActiveTab("Setting"),
+                }}
+            />
+
+            <Tabs.Screen 
+                name="practiceSelection" 
+                options={{
+                    title: "Practice Seletcion",
+                    tabBarIcon: () => null,
+                    tabBarButton: () => null,
+                }}
+            />
 
         </Tabs>
     );

@@ -2,7 +2,9 @@ import { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, Pressable } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { loadFonts } from '@/components/FontLoader';
-import { Link, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
+
+import { useTabContext } from '@/contexts/TabContext';
 
 const { ColorsPalette } = require("@/constants/colors.tsx");
 
@@ -10,6 +12,7 @@ export default function Home() {
   
   const [fontsLoaded, setFontsLoaded] = useState(false);
   const router = useRouter();
+  const { setActiveTab } = useTabContext();
 
   useEffect(() => {
     async function loadResources() {
@@ -29,7 +32,8 @@ export default function Home() {
       <Text style={styles.welcomeText}>WELCOME, YAPPER!</Text>
       <Text style={styles.practiceText}>PRACTICE</Text>
         <TouchableOpacity style={styles.playButton} onPress={() => {
-          router.replace("/practiceSelection");
+          setActiveTab("Home");
+          router.replace("/(tabs)/practiceSelection");
         }}>
           <MaterialIcons name="play-circle-outline" size={164} color={ColorsPalette.PrimaryColorLight}  />
         </TouchableOpacity>
