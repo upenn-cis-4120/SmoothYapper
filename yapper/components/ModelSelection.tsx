@@ -4,11 +4,11 @@ import { useEffect, useState, Dispatch, SetStateAction } from "react";
 const { ColorsPalette } = require("@/constants/colors.tsx");
 
 type Props = {
-    setSelectedModel: Dispatch<SetStateAction<{ id: number; name: string; favoriteFood: string; age: number; avatar: any; scenario: string; } | undefined>>;
+    setSelectedModel: Dispatch<SetStateAction<{ id: number; name: string; favoriteFood: string; age: number; avatar: any; scenario: string; fullImage: any } | undefined>>;
 }
 
 export default function ModdlSelection({setSelectedModel} : Props) {
-    const [propertiesList, setPropertiesList] = useState<{ id: number; name: string; favoriteFood: string; age: number; avatar: any; scenario: string; }[]>([]);
+    const [propertiesList, setPropertiesList] = useState<{ id: number; name: string; favoriteFood: string; age: number; avatar: any; scenario: string; fullImage: any}[]>([]);
     const [index, setIndex] = useState<number>(0);
 
     useEffect(() => {
@@ -26,6 +26,7 @@ export default function ModdlSelection({setSelectedModel} : Props) {
                 age: 21,
                 avatar: require('@/assets/images/cropped-tom.jpg'),
                 scenario: "Academic",
+                fullImage: require('@/assets/images/full-tom.jpg'),
             },
             {
                 id: 2,
@@ -34,6 +35,7 @@ export default function ModdlSelection({setSelectedModel} : Props) {
                 age: 1000000,
                 avatar: require('@/assets/images/cropped-doraemon.jpg'),
                 scenario: "Social",
+                fullImage: require('@/assets/images/full-doraemon.jpg'),
             },
         ];
         setPropertiesList(monkResponse);

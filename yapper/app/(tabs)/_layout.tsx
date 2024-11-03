@@ -10,9 +10,10 @@ export default function TabLayout() {
         throw new Error("useTabContext must be used within a TabProvider");
     }
     const { activeTab, setActiveTab } = tabContext;
+    const hideBarTabList = ["practice", "practiceResult"];
     
     return (
-        <Tabs screenOptions={{
+        <Tabs screenOptions={({route}) =>({
             tabBarActiveTintColor: ColorsPalette.SecondaryColorDeep,
             tabBarInactiveTintColor: ColorsPalette.PrimaryColorLight,
             // No header for the tabs
@@ -22,8 +23,9 @@ export default function TabLayout() {
                 backgroundColor: ColorsPalette.FullWhite,
                 height: 96,
                 borderTopWidth: 0,
+                display: hideBarTabList.includes(route.name) ? "none" : "flex",
             },
-        }}>
+        })}>
 
             <Tabs.Screen 
                 name="index" 
@@ -81,6 +83,24 @@ export default function TabLayout() {
                 name="practiceSelection" 
                 options={{
                     title: "Practice Seletcion",
+                    tabBarIcon: () => null,
+                    tabBarButton: () => null,
+                }}
+            />
+
+            <Tabs.Screen
+                name="practice"
+                options={{
+                    title: "Practice",
+                    tabBarIcon: () => null,
+                    tabBarButton: () => null,
+                }}
+            />
+
+            <Tabs.Screen
+                name="practiceResult"
+                options={{
+                    title: "Practice Result",
                     tabBarIcon: () => null,
                     tabBarButton: () => null,
                 }}

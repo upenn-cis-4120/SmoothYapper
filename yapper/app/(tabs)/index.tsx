@@ -12,7 +12,8 @@ export default function Home() {
   
   const [fontsLoaded, setFontsLoaded] = useState(false);
   const router = useRouter();
-  const { setActiveTab } = useTabContext();
+  const tabContext = useTabContext();
+  const setActiveTab = tabContext?.setActiveTab;
 
   useEffect(() => {
     async function loadResources() {

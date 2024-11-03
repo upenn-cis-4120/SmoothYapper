@@ -3,12 +3,13 @@ import { useEffect, useState } from "react";
 import { MaterialIcons } from "@expo/vector-icons";
 
 import ModelSelection from "@/components/ModelSelection";
+import { router } from "expo-router";
 
 const { ColorsPalette } = require("@/constants/colors.tsx");
 
 export default function practiceSelection() {
     const [points, setPoints] = useState<number>(0);
-    const [selectedModel, setSelectedModel] = useState<{id: number; name: string; favoriteFood: string; age: number; avatar: any; scenario: string;} | undefined>(undefined);
+    const [selectedModel, setSelectedModel] = useState<{id: number; name: string; favoriteFood: string; age: number; avatar: any; scenario: string; fullImage: any } | undefined>(undefined);
 
     useEffect(() => {
         // Fetch data from the server
@@ -28,6 +29,13 @@ export default function practiceSelection() {
                 ()=> {
                     console.log("Play button pressed");
                     console.log(selectedModel);
+                    router.replace({
+                        pathname: "/(tabs)/practice",
+                        params: {
+                            modelData: encodeURIComponent(JSON.stringify(selectedModel)),
+                        },
+                    }
+                    );
                 }
             }>
                 <MaterialIcons name="play-circle-outline" size={128} color={ColorsPalette.PrimaryColorLight}  />
