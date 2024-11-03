@@ -3,7 +3,10 @@ import { useLocalSearchParams, router } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
 import { Audio } from "expo-av";
 
+import { Message as MessageType } from "@/types/Message";
+
 const { ColorsPalette } = require("@/constants/colors.tsx");
+import sampleMessages from '@/assets/sampleData/MessageSamples';
 
 export default function Practice() {
     const { modelData } = useLocalSearchParams();
@@ -33,6 +36,7 @@ export default function Practice() {
                                     language: 3,
                                     topic: 2,
                                 })),
+                                sampleMessageData: encodeURIComponent(JSON.stringify(sampleMessages)),
                             },
                         });
                     }}>

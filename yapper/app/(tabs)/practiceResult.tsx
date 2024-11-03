@@ -7,12 +7,15 @@ import RatingDisplay from '@/components/StarRating';
 
 export default function PracticeResult() {
 
-    const { modelData, practiceResultData } = useLocalSearchParams();
+    const { modelData, practiceResultData, sampleMessageData } = useLocalSearchParams();
     console.log(`Model Data: ${modelData}`);
     console.log(`Practice Result Data: ${practiceResultData}`);
+    console.log(`Sample Message Data: ${sampleMessageData}`);
     const parsedModel = JSON.parse(decodeURIComponent(typeof modelData === "string" ? modelData : modelData[0]));
     const parsedPracticeResult = JSON.parse(decodeURIComponent(typeof practiceResultData === "string" ? practiceResultData : practiceResultData[0]));
     console.log(parsedPracticeResult);
+    const messages = JSON.parse(decodeURIComponent(typeof sampleMessageData === "string" ? sampleMessageData : sampleMessageData[0]));
+    console.log(messages);
     return (
         <View style={styles.feedbackContainer}>
             <Text style={styles.feedbackTitle}>FEEDBACK</Text>
@@ -33,7 +36,14 @@ export default function PracticeResult() {
                 <Text style={styles.overallPointValue}>100</Text>
             </View>
             <View style={styles.feedbackButtonContainer}>
-                <TouchableOpacity style={styles.feedbackButtons}>
+                <TouchableOpacity style={styles.feedbackButtons} onPress={ () => {
+                    router.replace({
+                        pathname: "/(tabs)/transcripts",
+                        params: {
+                            transcriptsData: encodeURIComponent(JSON.stringify(messages)),
+                        }
+                    })
+                }}>
                     <Text> View Transcripts</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.feedbackButtons}>
