@@ -27,7 +27,13 @@ export default function Practice() {
                             pathname: "/(tabs)/practiceResult",
                             params: {
                                 modelData: encodeURIComponent(JSON.stringify(parsedModel)),
-                            }
+                                practiceResultData: encodeURIComponent(JSON.stringify({
+                                    fluency: 3,
+                                    delivery: 3,
+                                    language: 3,
+                                    topic: 2,
+                                })),
+                            },
                         });
                     }}>
                         <Text style={styles.buttonFonts}>End</Text>
