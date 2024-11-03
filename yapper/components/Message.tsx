@@ -1,6 +1,7 @@
 // src/components/Message.tsx
-import { View, Text, Image, StyleSheet } from 'react-native';
+import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { Message as MessageType } from "@/types/Message";
+import { router } from "expo-router";
 
 const { ColorsPalette } = require("@/constants/colors.tsx");
 
@@ -9,7 +10,7 @@ type Props = {
 };
 
 export default function Message({ message }: Props) {
-    const { type, text, avatar } = message;
+    const { type, text, avatar, sentences } = message;
 
     const modelAvatar = require('@/assets/images/cropped-tom.jpg');
     const userAvatar = require('@/assets/images/user.png');
@@ -17,7 +18,26 @@ export default function Message({ message }: Props) {
     return type === 'sent' ? (
         <View style={styles.container}>
             <View style={[styles.message, styles.sent, styles.textSent]}>
-                <Text>{text}</Text>
+                {sentences.map((sentence, index) => (
+                    sentence.highlight ? (
+                        <TouchableOpacity onPress={() => {
+                            router.push({
+                                pathname: "/(tabs)/improvement",
+                                params: {
+                                    sentence: sentence.content,
+                                },
+                            });
+                        }}>
+                            <Text key={sentence.index} style={{color: ColorsPalette.SecondaryColorDeep}}>
+                                {sentence.content}
+                            </Text>
+                        </TouchableOpacity>
+                    ) : (
+                        <Text key={sentence.index} style={{color: ColorsPalette.NeutralColorDeep}}>
+                            {sentence.content}
+                        </Text>
+                    )
+                ))}
             </View>
             <Image source={userAvatar} style={styles.avatar} />
         </View>

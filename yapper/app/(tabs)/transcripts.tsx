@@ -2,6 +2,7 @@ import { SafeAreaView, ScrollView, TouchableOpacity, View, Text } from "react-na
 import { router, useLocalSearchParams } from "expo-router";
 
 import Message from "@/components/Message";
+import { Message as MessageType } from "@/types/Message";
 
 const { ColorsPalette } = require("@/constants/colors.tsx");
 
@@ -11,6 +12,18 @@ export default function Transcripts() {
     console.log(`Transcripts Data: ${transcriptsData}`);
     const parsedTranscripts = JSON.parse(decodeURIComponent(typeof transcriptsData === "string" ? transcriptsData : transcriptsData[0]));
     console.log(parsedTranscripts);
+    parsedTranscripts.forEach((message: MessageType) => {
+        const rawContent = message.text;
+        const sentenceRegex = /(?<=[.!?])\s+(?=[A-Z])|(?<=[.!?])\s*$/g;
+        const sentences: string[] = rawContent.split(sentenceRegex).filter(sentence => sentence.trim() !== '');
+        message.sentences = sentences.map((sentence, index) => {
+            return {
+                index: index,
+                content: sentence,
+                highlight: Math.random() < 0.2,
+            }
+        });
+    });
     return (
         <SafeAreaView style={styles.container}>
             <ScrollView>

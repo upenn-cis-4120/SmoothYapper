@@ -10,7 +10,7 @@ export default function TabLayout() {
         throw new Error("useTabContext must be used within a TabProvider");
     }
     const { activeTab, setActiveTab } = tabContext;
-    const hideBarTabList = ["practice", "practiceResult", "transcripts"];
+    const hideBarTabList = ["practice", "practiceResult", "transcripts", "improvement"];
     
     return (
         <Tabs screenOptions={({route}) =>({
@@ -110,6 +110,15 @@ export default function TabLayout() {
                 name="transcripts"
                 options={{
                     title: "Transcript",
+                    tabBarIcon: () => null,
+                    tabBarButton: () => null,
+                }}
+            />
+
+            <Tabs.Screen
+                name="improvement"
+                options={{
+                    title: "Improvement",
                     tabBarIcon: () => null,
                     tabBarButton: () => null,
                 }}
