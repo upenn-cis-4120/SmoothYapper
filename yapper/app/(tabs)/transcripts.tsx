@@ -3,14 +3,25 @@ import { router, useLocalSearchParams } from "expo-router";
 
 import Message from "@/components/Message";
 import { Message as MessageType } from "@/types/Message";
+import { useTabContext } from "@/contexts/TabContext";
+import { useEffect } from "react";
 
 const { ColorsPalette } = require("@/constants/colors.tsx");
 
 export default function Transcripts() {
+    const { pageAParams } = useTabContext();
     console.log("Transcripts Page");
-    const { transcriptsData } = useLocalSearchParams();
-    console.log(`Transcripts Data: ${transcriptsData}`);
-    const parsedTranscripts = JSON.parse(decodeURIComponent(typeof transcriptsData === "string" ? transcriptsData : transcriptsData[0]));
+    // const { transcriptsData } = useLocalSearchParams();
+    useEffect(() => {
+        console.log("Transcripts Page");
+        if (pageAParams) {
+            console.log(`page params: ${pageAParams}`);
+        }
+    }
+    , []);
+    // console.log(`Transcripts Data: ${transcriptsData}`);
+    // const parsedTranscripts = JSON.parse(decodeURIComponent(typeof transcriptsData === "string" ? transcriptsData : transcriptsData[0]));
+    const parsedTranscripts = pageAParams || [];
     console.log(parsedTranscripts);
     parsedTranscripts.forEach((message: MessageType) => {
         const rawContent = message.text;
@@ -34,7 +45,7 @@ export default function Transcripts() {
             <View style={styles.bottomBar}>
                 <TouchableOpacity style={styles.bottoms} onPress={() => {
                     console.log("Try Again button pressed");
-                    router.replace({
+                    router.push({
                         pathname: "/(tabs)/practiceSelection",
                     });
                 }}>
@@ -42,7 +53,7 @@ export default function Transcripts() {
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.bottoms} onPress={() => {
                     console.log("Home button pressed");
-                    router.replace({
+                    router.push({
                         pathname: "/(tabs)",
                     });
                 }}>

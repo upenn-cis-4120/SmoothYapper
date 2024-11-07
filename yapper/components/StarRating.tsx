@@ -23,24 +23,42 @@ const StarRating = ({ rating }: { rating: number }) => {
   };
 
 const RatingDisplay = ({ fluency, delivery, language, topic }: RatingData) => (
-<View>
-    <View>
-    <Text>Fluency</Text>
+<View style={styles.container}>
+    <View style={styles.itemWrapper}>
+    <Text style={styles.itemTitle}>Fluency</Text>
     <StarRating rating={fluency} />
     </View>
-    <View>
-    <Text>Delivery</Text>
+    <View style={styles.itemWrapper}>
+    <Text style={styles.itemTitle}>Delivery</Text>
     <StarRating rating={delivery} />
     </View>
-    <View>
-    <Text>Language</Text>
+    <View style={styles.itemWrapper}>
+    <Text style={styles.itemTitle}>Language</Text>
     <StarRating rating={language} />
     </View>
-    <View>
-    <Text>Topic</Text>
+    <View style={styles.itemWrapper}>
+    <Text style={styles.itemTitle}>Topic</Text>
     <StarRating rating={topic} />
     </View>
 </View>
 );
+
+const styles = {
+    container: {
+        padding: 10,
+        width: '80%',
+    },
+    itemTitle: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: ColorsPalette.PrimaryColorLight,
+        padding: 10,
+    },
+    itemWrapper: {
+        padding: 10,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+    }
+}
 
 export default RatingDisplay;

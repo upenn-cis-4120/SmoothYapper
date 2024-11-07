@@ -34,7 +34,7 @@ export default function Home() {
       <Text style={styles.practiceText}>PRACTICE</Text>
         <TouchableOpacity style={styles.playButton} onPress={() => {
           setActiveTab("Home");
-          router.replace("/(tabs)/practiceSelection");
+          router.push("/(tabs)/practiceSelection");
         }}>
           <MaterialIcons name="play-circle-outline" size={164} color={ColorsPalette.PrimaryColorLight}  />
         </TouchableOpacity>

@@ -20,7 +20,7 @@ export default function Message({ message }: Props) {
             <View style={[styles.message, styles.sent, styles.textSent]}>
                 {sentences.map((sentence, index) => (
                     sentence.highlight ? (
-                        <TouchableOpacity onPress={() => {
+                        <TouchableOpacity  key={sentence.index} onPress={() => {
                             router.push({
                                 pathname: "/(tabs)/improvement",
                                 params: {
@@ -28,12 +28,12 @@ export default function Message({ message }: Props) {
                                 },
                             });
                         }}>
-                            <Text key={sentence.index} style={{color: ColorsPalette.SecondaryColorDeep}}>
+                            <Text style={{color: ColorsPalette.SecondaryColorDeep}}>
                                 {sentence.content}
                             </Text>
                         </TouchableOpacity>
                     ) : (
-                        <Text key={sentence.index} style={{color: ColorsPalette.NeutralColorDeep}}>
+                        <Text key={sentence.index} style={{color: ColorsPalette.FullWhite}}>
                             {sentence.content}
                         </Text>
                     )
@@ -81,7 +81,7 @@ const styles = StyleSheet.create({
     textSent: {
         marginLeft: 10,
         borderRadius: 10,
-        backgroundColor: '#dcf8c6',
+        backgroundColor: ColorsPalette.PrimaryColorLighter,
     },
     textReceived: {
         marginRight: 10,

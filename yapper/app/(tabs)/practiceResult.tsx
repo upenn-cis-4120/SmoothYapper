@@ -4,6 +4,8 @@ import { useLocalSearchParams, router } from "expo-router";
 
 const { ColorsPalette } = require("@/constants/colors.tsx");
 import RatingDisplay from '@/components/StarRating';
+import { useTabContext } from '@/contexts/TabContext';
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function PracticeResult() {
 
@@ -16,13 +18,16 @@ export default function PracticeResult() {
     console.log(parsedPracticeResult);
     const messages = JSON.parse(decodeURIComponent(typeof sampleMessageData === "string" ? sampleMessageData : sampleMessageData[0]));
     console.log(messages);
+
+    const { setPageAParams } = useTabContext();
+
     return (
-        <View style={styles.feedbackContainer}>
+        <SafeAreaView style={styles.feedbackContainer}>
             <Text style={styles.feedbackTitle}>FEEDBACK</Text>
             <View style={styles.feedbackStars}>
-                <MaterialIcons name="star" size={40} color={ColorsPalette.PrimaryColorLight} />
-                <MaterialIcons name="star" size={40} color={ColorsPalette.PrimaryColorLight} />
-                <MaterialIcons name="star-border" size={40} color={ColorsPalette.PrimaryColorLight} />
+                <MaterialIcons name="star" size={64} color={ColorsPalette.SecondaryColorDeep} />
+                <MaterialIcons name="star" size={64} color={ColorsPalette.SecondaryColorDeep} />
+                <MaterialIcons name="star-border" size={64} color={ColorsPalette.SecondaryColorDeep} />
             </View>
             <Text style={styles.feedbackBreakdownTitle}>Breakdown</Text>
             <RatingDisplay 
@@ -37,7 +42,8 @@ export default function PracticeResult() {
             </View>
             <View style={styles.feedbackButtonContainer}>
                 <TouchableOpacity style={styles.feedbackButtons} onPress={ () => {
-                    router.replace({
+                    setPageAParams(messages);
+                    router.push({
                         pathname: "/(tabs)/transcripts",
                         params: {
                             transcriptsData: encodeURIComponent(JSON.stringify(messages)),
@@ -46,14 +52,26 @@ export default function PracticeResult() {
                 }}>
                     <Text> View Transcripts</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.feedbackButtons}>
+                <TouchableOpacity style={styles.feedbackButtons} onPress={
+                    () => {
+                        router.push({
+                            pathname: "/(tabs)/practiceSelection",
+                        });
+                    }
+                }>
                     <Text> Try Again</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.feedbackButtons}>
+                <TouchableOpacity style={styles.feedbackButtons} onPress={
+                    () => {
+                        router.push({
+                            pathname: "/(tabs)",
+                        });
+                    }
+                }>
                     <Text> Home</Text>
                 </TouchableOpacity>
             </View>
-        </View>
+        </SafeAreaView>
     )
 }
 
@@ -64,9 +82,10 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
     feedbackTitle: {
-        fontSize: 20,
+        fontSize: 36,
         fontWeight: "bold",
         color: ColorsPalette.PrimaryColorLight,
+        padding: 10,
     },
     feedbackStars: {
         flexDirection: "row",
@@ -79,9 +98,10 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
     feedbackBreakdownTitle: {
-        fontSize: 16,
+        fontSize: 24,
         fontWeight: "bold",
         color: ColorsPalette.PrimaryColorLight,
+        padding: 10,
     },
     feedbackButtonContainer: {
         justifyContent: "center",
@@ -95,19 +115,21 @@ const styles = StyleSheet.create({
         padding: 8,
     },
     overallPointFonts: {
-        fontSize: 16,
+        fontSize: 24,
         fontWeight: "bold",
         color: ColorsPalette.PrimaryColorLight,
     },
     overallPointValue: {
-        fontSize: 16,
+        fontSize: 24,
         fontWeight: "bold",
         color: ColorsPalette.SecondaryColorDeep,
     },
     overallPointContainer: {
         flexDirection: "row",
-        justifyContent: "center",
-        alignItems: "center",
+        width: "60%",
+        // make it space between:
+        justifyContent: "space-between",
+        padding: 10,
     },
     
 });

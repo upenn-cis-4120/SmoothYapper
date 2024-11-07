@@ -18,7 +18,7 @@ export default function Practice() {
                <View style={styles.leftBarWrapper}>
                 <TouchableOpacity style={styles.outlinedButton} onPress={() => {
                     console.log("Home button pressed");
-                    router.replace({
+                    router.push({
                         pathname: "/(tabs)",
                     })
                 }}>
@@ -26,7 +26,7 @@ export default function Practice() {
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.outlinedButton} onPress={() => {
                         console.log("End button pressed");
-                        router.replace({
+                        router.push({
                             pathname: "/(tabs)/practiceResult",
                             params: {
                                 modelData: encodeURIComponent(JSON.stringify(parsedModel)),
