@@ -102,10 +102,10 @@ const styles = StyleSheet.create({
         borderWidth: 5,
     },
     attribute: {
-        padding: 10,
+        padding: 5,
 
     },
     name: {
-        fontSize: 36,
+        fontSize: 24,
     }
 });

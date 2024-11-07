@@ -56,7 +56,7 @@ const styles = StyleSheet.create({
         backgroundColor: ColorsPalette.FullWhite,
     },
     playButton: {
-        paddingTop: 40,
+        paddingTop: 20,
     },
     pointsWrapper: {
         flexDirection: "row",
