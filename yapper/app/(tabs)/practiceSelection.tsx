@@ -4,6 +4,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 
 import ModelSelection from "@/components/ModelSelection";
 import { router } from "expo-router";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const { ColorsPalette } = require("@/constants/colors.tsx");
 
@@ -22,8 +23,11 @@ export default function practiceSelection() {
     }, []);
 
     return (
-        <View style={styles.componentWrapper}>
-            <Text>Overall Poins {points}</Text>
+        <SafeAreaView style={styles.componentWrapper}>
+            <View style={styles.pointsWrapper}>
+            <Text style={{fontSize: 24}}>Overall Points</Text>
+            <Text style={[{fontSize: 24}, {color: ColorsPalette.SecondaryColorDeep}]}>{points}</Text>
+            </View>
             <ModelSelection setSelectedModel={setSelectedModel}/>
             <TouchableOpacity style={styles.playButton} onPress={
                 ()=> {
@@ -40,7 +44,7 @@ export default function practiceSelection() {
             }>
                 <MaterialIcons name="play-circle-outline" size={128} color={ColorsPalette.PrimaryColorLight}  />
             </TouchableOpacity>
-        </View>
+        </SafeAreaView>
     );
 }
 
@@ -53,5 +57,10 @@ const styles = StyleSheet.create({
     },
     playButton: {
         paddingTop: 40,
+    },
+    pointsWrapper: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        width: "60%",
     }
 });

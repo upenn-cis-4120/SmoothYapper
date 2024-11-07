@@ -1,5 +1,6 @@
 import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
 import { useEffect, useState, Dispatch, SetStateAction } from "react";
+import { MaterialIcons } from "@expo/vector-icons";
 
 const { ColorsPalette } = require("@/constants/colors.tsx");
 
@@ -64,17 +65,17 @@ export default function ModdlSelection({setSelectedModel} : Props) {
                 <>
                 <View style={styles.selectionContainer}>
                     <TouchableOpacity onPress={handlePrevious}>
-                        <Text>Previous</Text>
+                        <MaterialIcons name="arrow-left" size={96} color={ColorsPalette.PrimaryColorLight}/>
                     </TouchableOpacity>
                     <Image source={propertiesList[index].avatar} style={styles.avatar}/>
                     <TouchableOpacity onPress={handleNext}>
-                        <Text>Next</Text>
+                        <MaterialIcons name="arrow-right" size={96} color={ColorsPalette.PrimaryColorLight}/>
                     </TouchableOpacity>
                 </View>
-                    <Text>{propertiesList[index].name}</Text>
-                    <Text>Favorite Food: {propertiesList[index].favoriteFood}</Text>
-                    <Text>Age: {propertiesList[index].age}</Text>
-                    <Text>Scenario: {propertiesList[index].scenario}</Text>
+                    <Text style = {[styles.attribute, styles.name]}>{propertiesList[index].name}</Text>
+                    <Text style = {styles.attribute}>Favorite Food: {propertiesList[index].favoriteFood}</Text>
+                    <Text style = {styles.attribute}>Age: {propertiesList[index].age}</Text>
+                    <Text style = {styles.attribute}>Scenario: {propertiesList[index].scenario}</Text>
                 </>
             )}
         </View>
@@ -100,4 +101,11 @@ const styles = StyleSheet.create({
         borderColor: ColorsPalette.SecondaryColorDeep,
         borderWidth: 5,
     },
+    attribute: {
+        padding: 10,
+
+    },
+    name: {
+        fontSize: 36,
+    }
 });
