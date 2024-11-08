@@ -43,7 +43,7 @@ export default function PracticeResult() {
             <View style={styles.feedbackButtonContainer}>
                 <TouchableOpacity style={styles.feedbackButtons} onPress={ () => {
                     setPageAParams(messages);
-                    router.push({
+                    router.replace({
                         pathname: "/(tabs)/transcripts",
                         params: {
                             transcriptsData: encodeURIComponent(JSON.stringify(messages)),
@@ -54,7 +54,7 @@ export default function PracticeResult() {
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.feedbackButtons} onPress={
                     () => {
-                        router.push({
+                        router.replace({
                             pathname: "/(tabs)/practiceSelection",
                         });
                     }
@@ -63,7 +63,7 @@ export default function PracticeResult() {
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.feedbackButtons} onPress={
                     () => {
-                        router.push({
+                        router.replace({
                             pathname: "/(tabs)",
                         });
                     }

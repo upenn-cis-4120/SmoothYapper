@@ -34,7 +34,7 @@ export default function Home() {
       <Text style={styles.practiceText}>PRACTICE</Text>
         <TouchableOpacity style={styles.playButton} onPress={() => {
           setActiveTab("Home");
-          router.push("/(tabs)/practiceSelection");
+          router.replace("/(tabs)/practiceSelection");
         }}>
           <MaterialIcons name="play-circle-outline" size={164} color={ColorsPalette.PrimaryColorLight}  />
         </TouchableOpacity>
@@ -51,17 +51,18 @@ const styles = StyleSheet.create({
     },
     welcomeText: {
         color: ColorsPalette.SecondaryColorDeep,
-        fontFamily: 'NunitoSans-VariableItalic',
+        fontFamily: 'NunitoSans_10pt-BoldItalic',
+        fontStyle: 'italic',
         fontSize: 36,
-        fontWeight: 800,
+        fontWeight: '800',
         paddingTop: 20,
         paddingBottom: 60,
     },
     practiceText: {
         color: ColorsPalette.PrimaryColorLight,
-        fontFamily: 'NunitoSans-Variable',
+        fontFamily: 'NunitoSans_10pt-Black',
         fontSize: 48,
-        fontWeight: 'black',
+        fontWeight: '900',
         paddingBottom: 60,
     },
     playButton: {

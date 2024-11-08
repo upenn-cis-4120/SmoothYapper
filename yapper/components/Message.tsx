@@ -21,7 +21,7 @@ export default function Message({ message }: Props) {
                 {sentences.map((sentence, index) => (
                     sentence.highlight ? (
                         <TouchableOpacity  key={sentence.index} onPress={() => {
-                            router.push({
+                            router.replace({
                                 pathname: "/(tabs)/improvement",
                                 params: {
                                     sentence: sentence.content,

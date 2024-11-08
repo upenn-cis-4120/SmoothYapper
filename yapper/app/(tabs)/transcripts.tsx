@@ -45,7 +45,7 @@ export default function Transcripts() {
             <View style={styles.bottomBar}>
                 <TouchableOpacity style={styles.bottoms} onPress={() => {
                     console.log("Try Again button pressed");
-                    router.push({
+                    router.replace({
                         pathname: "/(tabs)/practiceSelection",
                     });
                 }}>
@@ -53,7 +53,7 @@ export default function Transcripts() {
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.bottoms} onPress={() => {
                     console.log("Home button pressed");
-                    router.push({
+                    router.replace({
                         pathname: "/(tabs)",
                     });
                 }}>

@@ -26,7 +26,7 @@ export default function Improvement() {
             <View style={styles.bottomBar}>
                 <TouchableOpacity style={styles.bottoms} onPress={() => {
                     console.log("Try Again button pressed");
-                    router.push({
+                    router.replace({
                         pathname: "/(tabs)/practiceSelection",
                     });
                 }}>
@@ -34,7 +34,7 @@ export default function Improvement() {
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.bottoms} onPress={() => {
                     console.log("Home button pressed");
-                    router.push({
+                    router.replace({
                         pathname: "/(tabs)",
                     });
                 }}>
@@ -42,7 +42,7 @@ export default function Improvement() {
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.bottoms} onPress={() => {
                     console.log("Return to Transcripts button pressed");
-                    router.push({
+                    router.replace({
                         pathname: "/(tabs)/transcripts",
                     });                     
                 }}>

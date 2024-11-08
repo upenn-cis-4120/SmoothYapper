@@ -33,7 +33,7 @@ export default function practiceSelection() {
                 ()=> {
                     console.log("Play button pressed");
                     console.log(selectedModel);
-                    router.push({
+                    router.replace({
                         pathname: "/(tabs)/practice",
                         params: {
                             modelData: encodeURIComponent(JSON.stringify(selectedModel)),
