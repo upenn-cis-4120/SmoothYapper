@@ -141,7 +141,7 @@ export default function Practice() {
                     <MaterialIcons name="lightbulb-outline" size={40} color={ColorsPalette.PrimaryColorLight} />
                 </TouchableOpacity>
             </View>
-            <HintModal isVisible= {hintOpen} hintContents={["Hint 1: Never team up with Chinese", "Hint 2: Never choose math courses"]} onClose={() => {
+            <HintModal isVisible= {hintOpen} hintContents={["Hint 1: You only live once", "Hint 2: Never choose math courses"]} onClose={() => {
                 console.log("Hint modal closed");
                 setHintOpen(false);
                 setTimerActive(true);
