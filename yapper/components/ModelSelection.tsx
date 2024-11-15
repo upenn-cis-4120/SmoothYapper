@@ -6,9 +6,12 @@ const { ColorsPalette } = require("@/constants/colors.tsx");
 
 type Props = {
     setSelectedModel: Dispatch<SetStateAction<{ id: number; name: string; favoriteFood: string; age: number; avatar: any; scenario: string; fullImage: any } | undefined>>;
+    selectedScenario: string;
 }
 
-export default function ModdlSelection({setSelectedModel} : Props) {
+type ScenarioKeys = keyof typeof monkResponse;
+
+export default function ModdlSelection({setSelectedModel, selectedScenario} : Props) {
     const [propertiesList, setPropertiesList] = useState<{ id: number; name: string; favoriteFood: string; age: number; avatar: any; scenario: string; fullImage: any}[]>([]);
     const [index, setIndex] = useState<number>(0);
 
@@ -19,37 +22,17 @@ export default function ModdlSelection({setSelectedModel} : Props) {
         //     .then((data) => {
         //         setPropertiesList(data);
         //     });
-        const monkResponse = [
-            {
-                id: 1,
-                name: "Ray Liu",
-                favoriteFood: "Sushi",
-                age: 21,
-                avatar: require('@/assets/images/cropped-tom.jpg'),
-                scenario: "Academic",
-                fullImage: require('@/assets/images/full-tom.jpg'),
-            },
-            {
-                id: 2,
-                name: "Doraemon",
-                favoriteFood: "Dorayaki",
-                age: 1000000,
-                avatar: require('@/assets/images/cropped-doraemon.jpg'),
-                scenario: "Social",
-                fullImage: require('@/assets/images/full-doraemon.jpg'),
-            },
-        ];
-        setPropertiesList(monkResponse);
-        setIndex(0);
-        setSelectedModel(monkResponse[0]);
+        setPropertiesList(monkResponse.Social);
+        setSelectedModel(monkResponse.Social[0]);
     }
     , []);
-
     useEffect(() => {
+        console.log(selectedScenario);
+        setPropertiesList(monkResponse[selectedScenario as ScenarioKeys]);
         if (propertiesList.length > 0) {
             setSelectedModel(propertiesList[index]);
         }
-    }, [index, propertiesList, setSelectedModel]);
+    }, [index, setSelectedModel, selectedScenario]);
 
     const handlePrevious = () => {
         setIndex((prevIndex) => (prevIndex - 1 + propertiesList.length) % propertiesList.length);
@@ -109,3 +92,69 @@ const styles = StyleSheet.create({
         fontSize: 24,
     }
 });
+
+const monkResponse = {
+    Social: 
+    [
+        {
+            id: 1,
+            name: "Ray Liu",
+            favoriteFood: "Sushi",
+            age: 21,
+            avatar: require('@/assets/images/cropped-tom.jpg'),
+            scenario: "Academic",
+            fullImage: require('@/assets/images/full-tom.jpg'),
+        },
+        {
+            id: 2,
+            name: "Doraemon",
+            favoriteFood: "Dorayaki",
+            age: 1000000,
+            avatar: require('@/assets/images/cropped-doraemon.jpg'),
+            scenario: "Social",
+            fullImage: require('@/assets/images/full-doraemon.jpg'),
+        },
+    ],
+    Academic: 
+    [
+        {
+            id: 1,
+            name: "Einstein",
+            favoriteFood: "Strawberries",
+            age: 76,
+            avatar: require('@/assets/images/cropped-tom.jpg'),
+            scenario: "Academic",
+            fullImage: require('@/assets/images/full-tom.jpg'),
+        },
+        {
+            id: 2,
+            name: "Newton",
+            favoriteFood: "Apple",
+            age: 84,
+            avatar: require('@/assets/images/cropped-doraemon.jpg'),
+            scenario: "Social",
+            fullImage: require('@/assets/images/full-doraemon.jpg'),
+        },
+    ],
+    Sports:
+    [
+        {
+            id: 1,
+            name: "Giannis",
+            favoriteFood: "Nuggets",
+            age: 29,
+            avatar: require('@/assets/images/cropped-tom.jpg'),
+            scenario: "Academic",
+            fullImage: require('@/assets/images/full-tom.jpg'),
+        },
+        {
+            id: 2,
+            name: "Maxey",
+            favoriteFood: "CheeseSteak",
+            age: 24,
+            avatar: require('@/assets/images/cropped-doraemon.jpg'),
+            scenario: "Social",
+            fullImage: require('@/assets/images/full-doraemon.jpg'),
+        },
+    ]
+};

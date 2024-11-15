@@ -31,7 +31,7 @@ export default function Practice() {
     useFocusEffect(() => {
         if(isInitialMount) {
             setElapsedTime(0);
-            setTimerActive(true);
+            setTimerActive(false);
             setIsInitialMount(false);
         }
         return () => {};
