@@ -1,9 +1,8 @@
-import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Image, Alert, ScrollView } from "react-native";
 import { useEffect, useState } from "react";
 import Toast from "react-native-toast-message";
 import { useLocalSearchParams, router, useFocusEffect } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
-import { Audio } from "expo-av";
 
 import { Message as MessageType } from "@/types/Message";
 
@@ -12,6 +11,9 @@ import sampleMessages from '@/assets/sampleData/MessageSamples';
 
 import HintModal from "@/components/HintModal";
 import Timer from "@/components/Timer";
+import Message from "@/components/Message";
+import AudioRecorder from "@/components/AudioRecorder";
+import getChatGPTResponse from "@/components/ReponseGenerator";
 
 export default function Practice() {
     const { modelData } = useLocalSearchParams();
@@ -21,6 +23,8 @@ export default function Practice() {
     const [timerActive, setTimerActive] = useState(true);
     const [isInitialMount, setIsInitialMount] = useState(true); 
     const parsedModel = JSON.parse(decodeURIComponent(typeof modelData === "string" ? modelData : modelData[0]));
+    const [isRecording, setIsRecording] = useState(true);
+    const [messages, setMessages] = useState<MessageType[]>([]);
 
     useFocusEffect(() => {
         console.log("Focused on Practice screen");
@@ -33,6 +37,62 @@ export default function Practice() {
             console.log("Left Practice screen");
         };
     });
+
+    const handleTranscription = async (transcription: string) => {
+        console.log("Transcription: ", transcription);
+        const newMessage: MessageType = {
+            id: new Date().getTime(),
+            type: "sent",
+            text: transcription,
+            avatar: require('@/assets/images/user.png'),
+            sentences: [ {content: transcription, highlight: false, index: 0} ],
+            timestamp: new Date().toISOString(),
+        };
+        setMessages((prev) => [...prev, newMessage]);
+        const response = await getChatGPTResponse(transcription);
+        const responseMessage: MessageType = {
+            id: new Date().getTime(),
+            type: "received",
+            text: response,
+            avatar: require('@/assets/images/full-tom.jpg'),
+            sentences: [ {content: response, highlight: false, index: 0} ],
+            timestamp: new Date().toISOString(),
+        };
+        setMessages((prev) => [...prev, responseMessage]);
+    }
+
+    const toggleRecording = () => {
+        setIsRecording((prev) => !prev);
+        if (isRecording) {
+            Toast.show({
+                type: 'info',
+                text1: 'Recording Paused',
+                position: 'top',
+                autoHide: true,
+                topOffset: 80,
+                text1Style: {
+                    fontFamily: "NunitoSans-Variable",
+                    fontWeight: "800",
+                    color: ColorsPalette.PrimaryColorLight,
+                },
+                visibilityTime: 1000,
+            });
+        } else {
+            Toast.show({
+                type: 'info',
+                text1: 'Recording Resumed',
+                position: 'top',
+                autoHide: true,
+                topOffset: 80,
+                text1Style: {
+                    fontFamily: "NunitoSans-Variable",
+                    fontWeight: "800",
+                    color: ColorsPalette.PrimaryColorLight,
+                },
+                visibilityTime: 1000,
+            });
+        }
+    };
 
     const showPauseToast = () => {
         Toast.show({
@@ -67,6 +127,11 @@ export default function Practice() {
 
     return (
         <View style={styles.componentWrapper}>
+            <AudioRecorder
+                isRecording={isRecording}
+                onTranscription={handleTranscription}
+                slienceDuration={3000}
+            />
             <View style={styles.topBarWrapper}>
                <View style={styles.leftBarWrapper}>
                 <TouchableOpacity style={styles.outlinedButton} onPress={() => {
@@ -129,9 +194,23 @@ export default function Practice() {
                     {timerActive ? <MaterialIcons name="pause-circle-outline" size={40} color={ColorsPalette.PrimaryColorLight} /> : <MaterialIcons name="play-circle-outline" size={40} color={ColorsPalette.PrimaryColorLight} />}
                 </TouchableOpacity>
             </View>
-            <View style={styles.modelWrapper}>
+            {/* <View style={styles.modelWrapper}>
                 <Image source={parsedModel.fullImage} style={styles.fullImage}/>
+            </View> */}
+            <View style={styles.recordingWrapper}>
+                <TouchableOpacity onPress={toggleRecording} style={styles.recordingButton}>
+                    {isRecording ? (
+                        <MaterialIcons name="pause-circle-outline" size={40} color={ColorsPalette.PrimaryColorLight} />
+                    ) : (
+                        <MaterialIcons name="play-circle-outline" size={40} color={ColorsPalette.PrimaryColorLight} />
+                    )}
+                </TouchableOpacity>
             </View>
+            <ScrollView style={styles.messageWrapper}>
+                {messages.map((message, index) => (
+                    <Message key={index} message={message} />
+                ))}
+            </ScrollView>
             <View style={styles.bottomBar}>
                 <TouchableOpacity onPress={() => {
                     console.log("Hint button pressed");
@@ -207,5 +286,22 @@ const styles = StyleSheet.create({
         marginTop: 24,
         // Right align the items
         justifyContent: "flex-end",
-    }
+    },
+    recordingWrapper: {
+        backgroundColor: '#d3d3d3', // Debug background color for visibility
+        paddingVertical: 20,
+        alignItems: "center",
+    },
+    recordingButton: {
+        backgroundColor: '#ffcccb', // Debug background color for button visibility
+        borderRadius: 25,
+        padding: 10,
+    },
+    messageWrapper: {
+        flex: 1,
+        width: "90%",
+        paddingHorizontal: 10,
+        backgroundColor: '#e0e0e0', // Debug background color
+        borderRadius: 8,
+    },
 });

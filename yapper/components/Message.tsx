@@ -1,12 +1,15 @@
-// src/components/Message.tsx
-import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
-import { Message as MessageType } from "@/types/Message";
-import { router } from "expo-router";
-
-const { ColorsPalette } = require("@/constants/colors.tsx");
+import React from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { router } from 'expo-router';
+import { ColorsPalette } from '@/constants/colors';
 
 type Props = {
-    message: MessageType;
+    message: {
+        type: string;
+        text: string;
+        avatar: any;
+        sentences: { content: string; highlight: boolean; index: number }[];
+    };
 };
 
 export default function Message({ message }: Props) {
@@ -16,11 +19,11 @@ export default function Message({ message }: Props) {
     const userAvatar = require('@/assets/images/user.png');
 
     return type === 'sent' ? (
-        <View style={styles.container}>
-            <View style={[styles.message, styles.sent, styles.textSent]}>
+        <View style={styles.sentContainer}>
+            <View style={[styles.message, styles.sent]}>
                 {sentences.map((sentence, index) => (
                     sentence.highlight ? (
-                        <TouchableOpacity  key={sentence.index} onPress={() => {
+                        <TouchableOpacity key={sentence.index} onPress={() => {
                             router.replace({
                                 pathname: "/(tabs)/improvement",
                                 params: {
@@ -28,64 +31,76 @@ export default function Message({ message }: Props) {
                                 },
                             });
                         }}>
-                            <Text style={{color: ColorsPalette.SecondaryColorDeep}}>
+                            <Text style={{ color: ColorsPalette.SecondaryColorDeep }}>
                                 {sentence.content}
                             </Text>
                         </TouchableOpacity>
                     ) : (
-                        <Text key={sentence.index} style={{color: ColorsPalette.FullWhite}}>
+                        <Text key={sentence.index} style={styles.textSent}>
                             {sentence.content}
                         </Text>
                     )
                 ))}
             </View>
-            <Image source={userAvatar} style={styles.avatar} />
+            <View style={styles.avatarContainer}>
+                <Image source={userAvatar} style={styles.avatar} />
+            </View>
         </View>
     ) : (
         <View style={styles.container}>
-            <Image source={modelAvatar} style={styles.avatar} />
-            <View style={[styles.message, styles.received, styles.textReceived]}>
-                <Text>{text}</Text>
+            <View style={styles.avatarContainer}>
+                <Image source={modelAvatar} style={styles.avatar} />
+            </View>
+            <View style={[styles.message, styles.received]}>
+                {sentences.map((sentence, index) => (
+                    <Text key={sentence.index} style={styles.textReceived}>
+                        {sentence.content}
+                    </Text>
+                ))}
             </View>
         </View>
     );
-};
+}
 
 const styles = StyleSheet.create({
     container: {
         flexDirection: 'row',
-        padding: 10,
-        margin: 10,
-        maxWidth: '80%',
-        alignItems: 'flex-start',
+        marginVertical: 12,
+    },
+    sentContainer: {
+        flexDirection: 'row',
+        justifyContent: 'flex-end',
+        marginVertical: 5,
     },
     message: {
+        maxWidth: '70%',
         padding: 10,
         borderRadius: 10,
     },
     sent: {
+        backgroundColor: ColorsPalette.PrimaryColorLight,
         alignSelf: 'flex-end',
-    },
-    received: {
-        alignSelf: 'flex-start',
-    },
-    avatar: {
-        width: 30,
-        height: 30,
-        borderRadius: 15,
-        // borderColor: ColorsPalette.SecondaryColorDeep,
-        // borderWidth: 1,
-        marginHorizontal: 10,
-        marginVertical: 5,
+        marginLeft: 'auto',
     },
     textSent: {
-        marginLeft: 10,
-        borderRadius: 10,
-        backgroundColor: ColorsPalette.PrimaryColorLighter,
+        color: ColorsPalette.FullWhite,
+    },
+    received: {
+        backgroundColor: ColorsPalette.SecondaryColorLight,
+        alignSelf: 'flex-start',
+        marginRight: 'auto',
     },
     textReceived: {
+        color: "#000",
+    },
+    avatar: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
         marginRight: 10,
-        borderRadius: 10,
-        backgroundColor: ColorsPalette.NeutralColorLight,
-    }
+    },
+    avatarContainer: {
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
 });
