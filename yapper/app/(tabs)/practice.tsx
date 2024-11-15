@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TouchableOpacity, Image, Alert, ScrollView } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Image, Alert, ScrollView, SafeAreaView } from "react-native";
 import { useEffect, useState } from "react";
 import Toast from "react-native-toast-message";
 import { useLocalSearchParams, router, useFocusEffect } from "expo-router";
@@ -13,29 +13,28 @@ import HintModal from "@/components/HintModal";
 import Timer from "@/components/Timer";
 import Message from "@/components/Message";
 import AudioRecorder from "@/components/AudioRecorder";
-import getChatGPTResponse from "@/components/ReponseGenerator";
+import ChatGPTComponent from "@/components/ReponseGenerator";
 
 export default function Practice() {
     const { modelData } = useLocalSearchParams();
-    // console.log(modelData);
     const [ hintOpen, setHintOpen ] = useState(false);
     const [elapsedTime, setElapsedTime] = useState(0);
     const [timerActive, setTimerActive] = useState(true);
     const [isInitialMount, setIsInitialMount] = useState(true); 
     const parsedModel = JSON.parse(decodeURIComponent(typeof modelData === "string" ? modelData : modelData[0]));
-    const [isRecording, setIsRecording] = useState(true);
+    const [isRecording, setIsRecording] = useState(false);
     const [messages, setMessages] = useState<MessageType[]>([]);
+    const [isSessionActive, setIsSessionActive] = useState(true);
+    const [latestuserMessage, setLatestUserMessage] = useState<string>();
+    const [recordAble, setRecordAble] = useState(true);
 
     useFocusEffect(() => {
-        console.log("Focused on Practice screen");
         if(isInitialMount) {
             setElapsedTime(0);
             setTimerActive(true);
             setIsInitialMount(false);
         }
-        return () => {
-            console.log("Left Practice screen");
-        };
+        return () => {};
     });
 
     const handleTranscription = async (transcription: string) => {
@@ -49,7 +48,12 @@ export default function Practice() {
             timestamp: new Date().toISOString(),
         };
         setMessages((prev) => [...prev, newMessage]);
-        const response = await getChatGPTResponse(transcription);
+        setIsSessionActive(true);
+        setLatestUserMessage(transcription);
+        console.log("User STT messages added to the chat");
+    }
+
+    const handleChatGPTResponse = (response: string) => {
         const responseMessage: MessageType = {
             id: new Date().getTime(),
             type: "received",
@@ -58,10 +62,27 @@ export default function Practice() {
             sentences: [ {content: response, highlight: false, index: 0} ],
             timestamp: new Date().toISOString(),
         };
+        console.log("ChatGPT response:", response);
         setMessages((prev) => [...prev, responseMessage]);
     }
 
     const toggleRecording = () => {
+        if(!recordAble){
+            Toast.show({
+                type: 'error',
+                text1: 'Please wait for the model to finish speaking',
+                position: 'top',
+                autoHide: true,
+                topOffset: 80,
+                text1Style: {
+                    fontFamily: "NunitoSans-Variable",
+                    fontWeight: "800",
+                    color: ColorsPalette.PrimaryColorLight,
+                },
+                visibilityTime: 1000,
+            });
+            return;
+        }
         setIsRecording((prev) => !prev);
         if (isRecording) {
             Toast.show({
@@ -77,6 +98,8 @@ export default function Practice() {
                 },
                 visibilityTime: 1000,
             });
+            // Stop the timer
+            setTimerActive(false);
         } else {
             Toast.show({
                 type: 'info',
@@ -91,6 +114,8 @@ export default function Practice() {
                 },
                 visibilityTime: 1000,
             });
+            // Start the timer
+            setTimerActive(true);
         }
     };
 
@@ -126,12 +151,13 @@ export default function Practice() {
     };
 
     return (
-        <View style={styles.componentWrapper}>
+        <SafeAreaView style={styles.componentWrapper}>
             <AudioRecorder
                 isRecording={isRecording}
                 onTranscription={handleTranscription}
                 slienceDuration={3000}
             />
+            <ChatGPTComponent input={latestuserMessage || ''} active={isSessionActive} onResponse={handleChatGPTResponse} setRecordAble={setRecordAble} />
             <View style={styles.topBarWrapper}>
                <View style={styles.leftBarWrapper}>
                 <TouchableOpacity style={styles.outlinedButton} onPress={() => {
@@ -139,6 +165,8 @@ export default function Practice() {
                     setElapsedTime(0);
                     setTimerActive(false);
                     setIsInitialMount(true);
+                    setIsSessionActive(false);
+                    setMessages([]);
                     router.replace({
                         pathname: "/(tabs)",
                     })
@@ -150,6 +178,8 @@ export default function Practice() {
                         setElapsedTime(0);
                         setTimerActive(false);
                         setIsInitialMount(true);
+                        setIsSessionActive(false);
+                        setMessages([]);
                         router.replace({
                             pathname: "/(tabs)/practiceResult",
                             params: {
@@ -194,31 +224,35 @@ export default function Practice() {
                     {timerActive ? <MaterialIcons name="pause-circle-outline" size={40} color={ColorsPalette.PrimaryColorLight} /> : <MaterialIcons name="play-circle-outline" size={40} color={ColorsPalette.PrimaryColorLight} />}
                 </TouchableOpacity>
             </View>
-            {/* <View style={styles.modelWrapper}>
-                <Image source={parsedModel.fullImage} style={styles.fullImage}/>
-            </View> */}
-            <View style={styles.recordingWrapper}>
-                <TouchableOpacity onPress={toggleRecording} style={styles.recordingButton}>
-                    {isRecording ? (
-                        <MaterialIcons name="pause-circle-outline" size={40} color={ColorsPalette.PrimaryColorLight} />
-                    ) : (
-                        <MaterialIcons name="play-circle-outline" size={40} color={ColorsPalette.PrimaryColorLight} />
-                    )}
-                </TouchableOpacity>
-            </View>
             <ScrollView style={styles.messageWrapper}>
                 {messages.map((message, index) => (
                     <Message key={index} message={message} />
                 ))}
             </ScrollView>
             <View style={styles.bottomBar}>
-                <TouchableOpacity onPress={() => {
-                    console.log("Hint button pressed");
-                    setHintOpen(true);
-                    setTimerActive(false);
-                }}>
-                    <MaterialIcons name="lightbulb-outline" size={40} color={ColorsPalette.PrimaryColorLight} />
-                </TouchableOpacity>
+                <View style={{flex: 1}}></View>
+                <View style={styles.recordingWrapper}>
+                    <TouchableOpacity onPress={toggleRecording} style={styles.recordingButton}>
+                        {
+                            recordAble ? isRecording ? (
+                                <MaterialIcons name="mic" size={40} color={ColorsPalette.PrimaryColorLight} />
+                            ): (
+                                <MaterialIcons name="mic-none" size={40} color={ColorsPalette.PrimaryColorLight} />
+                            ) : (
+                                <MaterialIcons name="mic-off" size={40} color={ColorsPalette.PrimaryColorLight} />
+                            )
+                        }
+                    </TouchableOpacity>
+                </View>
+                <View style={{ flex: 1, alignItems: 'flex-end' }}>
+                    <TouchableOpacity onPress={() => {
+                        console.log("Hint button pressed");
+                        setHintOpen(true);
+                        setTimerActive(false);
+                    }} style={styles.hintButton}>
+                        <MaterialIcons name="lightbulb-outline" size={40} color={ColorsPalette.PrimaryColorLight} />
+                    </TouchableOpacity>
+                </View>
             </View>
             <HintModal isVisible= {hintOpen} hintContents={["Hint 1: You only live once", "Hint 2: Never choose math courses"]} onClose={() => {
                 console.log("Hint modal closed");
@@ -226,7 +260,7 @@ export default function Practice() {
                 setTimerActive(true);
             }} />
             <Toast/>
-        </View>
+        </SafeAreaView>
     )
 };
 
@@ -261,7 +295,6 @@ const styles = StyleSheet.create({
         justifyContent: "space-between",
     },
     modelWrapper:{
-        // flex: 1,
         marginTop: 20,
         justifyContent: "center",
         alignItems: "center",
@@ -271,37 +304,31 @@ const styles = StyleSheet.create({
         borderColor: ColorsPalette.PrimaryColorLight,
         borderRadius: 8,
     },
-    fullImage: {
-        width: "100%",
-        height: undefined, // Allow the height to adjust based on the aspect ratio
-        aspectRatio: 1, // Adjust the aspect ratio to suit your image (e.g., 1:1 for square images)
-        resizeMode: "contain", // Ensures the entire image fits within the container without cropping
-        maxWidth: 400, // Set maxWidth to limit the image size
-        maxHeight: 400,
-    },
     bottomBar: {
         flexDirection: "row",
         width: "100%",
         paddingHorizontal: 24,
         marginTop: 24,
-        // Right align the items
-        justifyContent: "flex-end",
+        justifyContent: "space-between",
+        alignItems: "center",
     },
     recordingWrapper: {
-        backgroundColor: '#d3d3d3', // Debug background color for visibility
-        paddingVertical: 20,
+        flex: 1,
         alignItems: "center",
     },
     recordingButton: {
-        backgroundColor: '#ffcccb', // Debug background color for button visibility
+        backgroundColor: ColorsPalette.SecondaryColorLight,
         borderRadius: 25,
         padding: 10,
+    },
+    hintButton: {
+        alignSelf: 'flex-end',
     },
     messageWrapper: {
         flex: 1,
         width: "90%",
         paddingHorizontal: 10,
-        backgroundColor: '#e0e0e0', // Debug background color
+        backgroundColor: ColorsPalette.FullWhite,
         borderRadius: 8,
     },
 });

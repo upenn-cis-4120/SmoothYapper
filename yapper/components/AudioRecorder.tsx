@@ -27,22 +27,8 @@ export default function AudioRecorder({ slienceDuration = 3000, isRecording, onT
       }, []);
     
     const [recording, setRecording] = useState<Audio.Recording | null>(null);
-    const [silentTimeout, setSilentTimeout] = useState<NodeJS.Timeout | null>(null);
-    const silenceThreshold = -40;
-
-    useEffect(() => {
-        if(isRecording) {
-            startRecording();
-        } else {
-            stopRecording();
-        }
-
-        return () => {
-            if(recording) {
-                stopRecording();
-            }
-        }
-    }, [isRecording]);
+    // const [silentTimeout, setSilentTimeout] = useState<NodeJS.Timeout | null>(null);
+    // const silenceThreshold = -40;
 
     const startRecording = async () => {
         if(recording) {
@@ -58,7 +44,7 @@ export default function AudioRecorder({ slienceDuration = 3000, isRecording, onT
             Audio.RecordingOptionsPresets.HIGH_QUALITY
         );
         setRecording(newRecording);
-        monitorAudioLevel(newRecording);
+        // monitorAudioLevel(newRecording);
     };
 
     const stopRecording = async () => {
@@ -77,24 +63,43 @@ export default function AudioRecorder({ slienceDuration = 3000, isRecording, onT
         }
     };
 
-    const monitorAudioLevel = async (currentRecording: Audio.Recording) => {
-        const intervalId = setInterval(async () => {
-            const status = await currentRecording.getStatusAsync();
-            if (status.metering && status.metering < silenceThreshold) {
-                if (!silentTimeout) {
-                    setSilentTimeout(
-                        setTimeout(() => {
-                            stopRecording();
-                            clearInterval(intervalId);
-                        }, slienceDuration)
-                    );
-                }
-            } else if (silentTimeout) {
-                clearTimeout(silentTimeout);
-                setSilentTimeout(null);
-            }
-        }, 500);
-    };
+    // const monitorAudioLevel = async (currentRecording: Audio.Recording) => {
+    //     const intervalId = setInterval(async () => {
+    //         const status = await currentRecording.getStatusAsync();
+    //         if (status.metering && status.metering < silenceThreshold) {
+    //             if (!silentTimeout) {
+    //                 setSilentTimeout(
+    //                     setTimeout(() => {
+    //                         stopRecording();
+    //                         clearInterval(intervalId);
+    //                     }, slienceDuration)
+    //                 );
+    //             }
+    //         } else if (silentTimeout) {
+    //             clearTimeout(silentTimeout);
+    //             setSilentTimeout(null);
+    //         }
+    //     }, 500);
+    // };
+
+    useEffect(() => {
+        if(isRecording) {
+            console.log("isRecording is true. Time to start recording");
+            startRecording();
+            console.log("Recording started");
+        } else if (recording) {
+            console.log("isRecording is false. Time to stop recording");
+            stopRecording();
+            console.log("Recording stopped");
+        }
+
+        // return () => {
+        //     if(recording) {
+        //         console.log("The recorder is still recording, Recording stopped");
+        //         stopRecording();
+        //     }
+        // }
+    }, [isRecording]);
 
     const transcriptionTool = async (audioUri : string) => {
         try {
@@ -116,32 +121,13 @@ export default function AudioRecorder({ slienceDuration = 3000, isRecording, onT
             });
 
             const data = await response.json();
-            console.log(data);
+            console.log("STT ResponseData: ", data);
             const transcriptedText = data.text || "";
             onTranscription(transcriptedText);
         } catch (error) {
             console.error(error);
         }
     };
-
-    const getChatGPTResponse = async (input: string) => {
-        const response = await fetch("https://api.openai.com/v1/chat/completions", {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${OPENAI_API_KEY}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            model: "gpt-4o",
-            messages: [{ role: "user", content: input }],
-          }),
-        });
-    
-        const data = await response.json();
-        console.log(data);
-        return data.choices[0].message.content;
-      };
-
     return null;
 };
 

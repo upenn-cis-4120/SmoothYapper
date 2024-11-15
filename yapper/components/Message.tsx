@@ -97,7 +97,7 @@ const styles = StyleSheet.create({
         width: 40,
         height: 40,
         borderRadius: 20,
-        marginRight: 10,
+        marginHorizontal: 10,
     },
     avatarContainer: {
         justifyContent: 'center',
