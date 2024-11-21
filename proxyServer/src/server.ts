@@ -64,6 +64,23 @@ interface ConversationEntry {
 
 type ConversationHistory = ConversationEntry[];
 
+app.post('/endChat', fileStorage.none(), async (req: Request, res: Response) => {
+  const sessionId = req.body.sessionId;
+  if (!sessionId) {
+    res.status(400).send('Missing sessionId.');
+    return;
+  }
+
+  const sessionData = await redisClient.get(sessionId);
+  if (!sessionData) {
+    res.status(400).send('Session not found.');
+    return;
+  }
+
+  await redisClient.del(sessionId);
+  res.json({ message: 'Session ended.' });
+});
+
 app.post('/initChat', fileStorage.none() ,async (req: Request, res: Response) => {
   const scnario = req.body.scenario;
   if (!scnario) {
