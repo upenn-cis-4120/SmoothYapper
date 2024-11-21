@@ -1,8 +1,11 @@
 import { View, Text, StyleSheet, TouchableOpacity, Image, Alert, ScrollView, SafeAreaView } from "react-native";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Toast from "react-native-toast-message";
 import { useLocalSearchParams, router, useFocusEffect } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
+import axios from 'axios';
+import FormData from 'form-data';
+import * as FileSystem from 'expo-file-system';
 
 import { Message as MessageType } from "@/types/Message";
 
@@ -13,7 +16,9 @@ import HintModal from "@/components/HintModal";
 import Timer from "@/components/Timer";
 import Message from "@/components/Message";
 import AudioRecorder from "@/components/AudioRecorder";
-import ChatGPTComponent from "@/components/ReponseGenerator";
+import AudioPlayer from "@/components/AudioPlayer";
+
+const baseURL = "http://100.110.220.66:3000";
 
 export default function Practice() {
     const { modelData } = useLocalSearchParams();
@@ -27,6 +32,42 @@ export default function Practice() {
     const [isSessionActive, setIsSessionActive] = useState(true);
     const [latestuserMessage, setLatestUserMessage] = useState<string>();
     const [recordAble, setRecordAble] = useState(true);
+    const [recordingUri, setRecordingUri] = useState<string>();
+    const sessionIdRef = useRef<string>("");
+    const [ttsAudioUri, setTtsAudioUri] = useState<string>();
+    const [playing, setPlaying] = useState(false);
+    const [generating, setGenerating] = useState(false);
+    const [transcribing, setTranscribing] = useState(false);
+
+    const generatingMessage : MessageType = {
+        id: messages.length+1,
+        type: "received",
+        text: "Generating response...",
+        sentences: [
+            {
+                content: "Generating response...",
+                highlight: false,
+                index: 0,
+            },
+        ],
+        timestamp: new Date().toISOString(),
+        avatar: "@/assets/images/cropped-tom.jpg",
+    };
+
+    const recordingMessage : MessageType = {
+        id: messages.length+1,
+        type: "sent",
+        text: "Recording...",
+        sentences: [
+            {
+                content: "Recording...",
+                highlight: false,
+                index: 0,
+            },
+        ],
+        timestamp: new Date().toISOString(),
+        avatar: "@/assets/images/cropped-tom.jpg",
+    };
 
     useFocusEffect(() => {
         if(isInitialMount) {
@@ -37,34 +78,138 @@ export default function Practice() {
         return () => {};
     });
 
-    const handleTranscription = async (transcription: string) => {
-        console.log("Transcription: ", transcription);
-        const newMessage: MessageType = {
-            id: new Date().getTime(),
-            type: "sent",
-            text: transcription,
-            avatar: require('@/assets/images/user.png'),
-            sentences: [ {content: transcription, highlight: false, index: 0} ],
-            timestamp: new Date().toISOString(),
+    useEffect(() => {
+        const getSessionId = async () => {
+            const response = await axios.post(`${baseURL}/initChat`, {
+                scenario : "Academic",
+            });
+            console.log(`SessionId: ${response.data.sessionId}`);
+            sessionIdRef.current = response.data.sessionId;
         };
-        setMessages((prev) => [...prev, newMessage]);
-        setIsSessionActive(true);
-        setLatestUserMessage(transcription);
-        console.log("User STT messages added to the chat");
-    }
 
-    const handleChatGPTResponse = (response: string) => {
-        const responseMessage: MessageType = {
-            id: new Date().getTime(),
-            type: "received",
-            text: response,
-            avatar: require('@/assets/images/full-tom.jpg'),
-            sentences: [ {content: response, highlight: false, index: 0} ],
-            timestamp: new Date().toISOString(),
+        if(isSessionActive && isInitialMount && sessionIdRef.current === "") {
+            getSessionId();
+        }
+    },[]);
+
+    useEffect(() => {
+        const postAudioForTranscription = async () => {
+            try {
+                setTranscribing(true);
+                const formData = new FormData();
+                formData.append('audio', {
+                    uri: recordingUri, // The file URI
+                    name: 'recording.m4a', // A name for the file
+                    type: 'audio/m4a', // MIME type of the file
+                  });
+                const response = await fetch(`${baseURL}/transcribe`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    },
+                    body: formData as any,
+                });
+
+                const transcription = await response.json();
+                console.log(`Transcription: ${transcription.text}`);
+                
+                const message: MessageType = {
+                    id: messages.length+1,
+                    type: "sent",
+                    text: transcription.text,
+                    sentences: transcription.text
+                        .split('. ') // Example splitting by sentences
+                        .map((content: string, index: number) => ({
+                        content,
+                        highlight: false, // or some logic to determine highlighting
+                        index,
+                    })),
+                    timestamp: new Date().toISOString(),
+                    avatar: "@/assets/images/cropped-tom.jpg",
+                };
+                console.log(`Message: ${message.text}`);
+                setTranscribing(false);
+                setMessages((prevMessages) => [...prevMessages, message]);
+                setLatestUserMessage(transcription.text);
+            } catch (error) {
+                console.error(error);
+            }
         };
-        console.log("ChatGPT response:", response);
-        setMessages((prev) => [...prev, responseMessage]);
-    }
+
+        if(recordingUri) {
+            postAudioForTranscription();
+        }
+    }, [recordingUri]);
+
+    useEffect(() => {
+        const getGPTResponse = async () => {
+            if(latestuserMessage) {
+                setGenerating(true);
+                const formData = new FormData();
+                formData.append('sessionId', sessionIdRef.current);
+                formData.append('message', latestuserMessage);
+
+                const textResponse = await fetch(`${baseURL}/chat`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    },
+                    body: formData as any,
+                });
+                if(!textResponse.ok) {
+                    console.error(`GPT Response Error: ${textResponse.text}`);
+                    return;
+                }
+                const textResponseJson = await textResponse.json();
+                console.log(`GPT Response: ${textResponseJson.message}`);
+                
+                const ttsResponse = await fetch(`${baseURL}/speech`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        text: textResponseJson.message,
+                    }),
+                });
+                if(!ttsResponse.ok) {
+                    console.error(`TTS Response Error: ${ttsResponse.text}`);
+                    return;
+                }
+                const ttsResponseJson = await ttsResponse.json();
+                const base64Audio = ttsResponseJson.audio;
+                const fileUri = `${FileSystem.cacheDirectory}${new Date().toISOString()}temp_audio.mp3`;
+                await FileSystem.writeAsStringAsync(fileUri, base64Audio, {
+                    encoding: FileSystem.EncodingType.Base64,
+                });
+                console.log("Setting TTS Audio URI: ", fileUri);
+                setTtsAudioUri(fileUri);
+
+                setMessages((prevMessages) => [
+                    ...prevMessages,
+                    {
+                        id: prevMessages.length+1,
+                        type: "received",
+                        text: textResponseJson.message,
+                        sentences: textResponseJson.message
+                            .split('. ') // Example splitting by sentences
+                            .map((content: string, index: number) => ({
+                            content,
+                            highlight: false, // or some logic to determine highlighting
+                            index,
+                        })),
+                        timestamp: new Date().toISOString(),
+                        avatar: "@/assets/images/cropped-tom.jpg",
+                    },
+                ]);
+                setGenerating(false);
+            }
+        };
+
+        if(latestuserMessage) {
+            getGPTResponse();
+        }
+    }, [latestuserMessage]);
 
     const toggleRecording = () => {
         if(!recordAble){
@@ -154,10 +299,14 @@ export default function Practice() {
         <SafeAreaView style={styles.componentWrapper}>
             <AudioRecorder
                 isRecording={isRecording}
-                onTranscription={handleTranscription}
-                slienceDuration={3000}
+                setRecordingUri={setRecordingUri}
             />
-            <ChatGPTComponent input={latestuserMessage || ''} active={isSessionActive} onResponse={handleChatGPTResponse} setRecordAble={setRecordAble} />
+            <AudioPlayer
+                audioUri={ttsAudioUri}
+                setPlaying={setPlaying}
+                isSessionActive={isSessionActive}
+                setRecordAble={setRecordAble}
+            />
             <View style={styles.topBarWrapper}>
                <View style={styles.leftBarWrapper}>
                 <TouchableOpacity style={styles.outlinedButton} onPress={() => {
@@ -228,6 +377,12 @@ export default function Practice() {
                 {messages.map((message, index) => (
                     <Message key={index} message={message} />
                 ))}
+                {(isRecording || transcribing) && (
+                    <Message key={2} message={recordingMessage} />
+                )}
+                {(generating) && (
+                    <Message key={1} message={generatingMessage} />
+                )}
             </ScrollView>
             <View style={styles.bottomBar}>
                 <View style={{flex: 1}}></View>

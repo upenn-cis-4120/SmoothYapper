@@ -17,7 +17,7 @@ export default function Message({ message }: Props) {
 
     const modelAvatar = require('@/assets/images/cropped-tom.jpg');
     const userAvatar = require('@/assets/images/user.png');
-
+    
     return type === 'sent' ? (
         <View style={styles.sentContainer}>
             <View style={[styles.message, styles.sent]}>

@@ -1,20 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { Audio } from "expo-av";
-import OpenAI from 'openai';
-import { OPENAI_API_KEY } from "@env";
 
 type AudioRecorderProps = {
     // onSegmentRecorded: (audioUri: string) => void;
-    slienceDuration: number;
+    // slienceDuration: number;
     isRecording: boolean;
-    onTranscription: (transcription: string) => void;
+    setRecordingUri: React.Dispatch<React.SetStateAction<string | undefined>>;
 };
 
-const openai = new OpenAI({
-    apiKey: OPENAI_API_KEY,
-})
 
-export default function AudioRecorder({ slienceDuration = 3000, isRecording, onTranscription }: AudioRecorderProps) {
+export default function AudioRecorder({ isRecording, setRecordingUri }: AudioRecorderProps) {
     useEffect(() => {
         (async () => {
           const status = await Audio.requestPermissionsAsync();
@@ -55,8 +50,8 @@ export default function AudioRecorder({ slienceDuration = 3000, isRecording, onT
             const uri = recording.getURI();
             console.log("Recording stopped and stored at", uri);
             setRecording(null);
-            if (uri) {
-                await transcriptionTool(uri);
+            if (uri && setRecordingUri) {
+                setRecordingUri(uri);
             }
         } catch (error) {
             console.error("Failed to stop recording", error);
@@ -100,34 +95,6 @@ export default function AudioRecorder({ slienceDuration = 3000, isRecording, onT
         //     }
         // }
     }, [isRecording]);
-
-    const transcriptionTool = async (audioUri : string) => {
-        try {
-            const formData = new FormData();
-            formData.append("file", {
-                uri: audioUri,
-                type: "audio/m4a",
-                name: "audio.m4a",
-            } as any);
-            formData.append("model", "whisper-1");
-
-            const response = await fetch("https://api.openai.com/v1/audio/transcriptions", {
-                method: "POST",
-                headers: {
-                    Authorization: `Bearer ${OPENAI_API_KEY}`,
-                    "Content-Type": "multipart/form-data",
-                },
-                body: formData,
-            });
-
-            const data = await response.json();
-            console.log("STT ResponseData: ", data);
-            const transcriptedText = data.text || "";
-            onTranscription(transcriptedText);
-        } catch (error) {
-            console.error(error);
-        }
-    };
     return null;
 };
 

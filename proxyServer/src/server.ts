@@ -160,6 +160,6 @@ app.post('/speech', fileStorage.none(), async (req: Request, res: Response): Pro
   }
 });
 
-app.listen(port, () => {
-  console.log(`Server listening at http://localhost:${port}`);
+app.listen(3000, '0.0.0.0', () => {
+  console.log('Server is running...');
 });
