@@ -323,6 +323,7 @@ export default function Practice() {
                         <Text style={styles.buttonFonts}>Home</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.outlinedButton} onPress={() => {
+                        // TODO: Init an end session request
                         console.log("End button pressed");
                         setElapsedTime(0);
                         setTimerActive(false);
