@@ -10,6 +10,8 @@ import bodyParser from 'body-parser';
 import { createClient } from 'redis';
 import { v4 as uuidV4 } from 'uuid';
 
+import { chatbotScenarios, Scenario, ExamplePrompt } from "./modelParameters";
+
 configDotenv();
 const app = express();
 const port: string | number = process.env.PORT || 3000;
@@ -40,9 +42,8 @@ app.post('/transcribe', fileStorage.single('audio'), async (req: Request, res: R
     res.status(400).send('No file uploaded or no audio data found.');
     return;
   }
-
+  const tempFilePath = pathJoin(tmpdir(), `upload-${Date.now()}.m4a`);
   try {
-    const tempFilePath = pathJoin(tmpdir(), `upload-${Date.now()}.m4a`);
     await fsPromises.writeFile(tempFilePath, file.buffer);
     const response = await openai.audio.transcriptions.create({
       file: fs.createReadStream(tempFilePath),
@@ -54,6 +55,13 @@ app.post('/transcribe', fileStorage.single('audio'), async (req: Request, res: R
   } catch (error) {
     console.error('Error:', error);
     res.status(500).send('Error processing transcription.');
+  } finally {
+    // Delete the temporary file after processing.
+    fs.unlink(tempFilePath, (err) => {
+      if (err) {
+        console.error('Error deleting temporary file:', err);
+      }
+    });
   }
 });
 
@@ -82,15 +90,22 @@ app.post('/endChat', fileStorage.none(), async (req: Request, res: Response) => 
 });
 
 app.post('/initChat', fileStorage.none() ,async (req: Request, res: Response) => {
-  const scnario = req.body.scenario;
-  if (!scnario) {
+  const scenario = req.body.scenario;
+  if (!scenario) {
     res.status(400).send('Missing scenario.');
     return;
   } else {
-    console.log("Scenario: ", scnario);
+    console.log("Scenario: ", scenario);
   }
   const sessionId = uuidV4();
-  const conversationHistory: ConversationHistory = [{ content: scnario, role: 'system' }];
+
+  const scenarioData = chatbotScenarios[scenario];
+  if(!scenarioData) {
+    res.status(400).send('Invalid scenario.');
+    return;
+  }
+  
+  const conversationHistory: ConversationHistory = [{ content: scenarioData.defaultPrompt, role: 'system' }];
   redisClient.set(sessionId, JSON.stringify(conversationHistory));
   res.json({ sessionId });
 });
@@ -167,7 +182,7 @@ app.post('/speech', fileStorage.none(), async (req: Request, res: Response): Pro
     });
 
     const buffer = Buffer.from(await response.arrayBuffer());
-    if (!test) {
+    if (test) {
       await fsPromises.writeFile(speechFile, buffer);
     }
     res.json({ audio: buffer.toString('base64') });
@@ -176,6 +191,11 @@ app.post('/speech', fileStorage.none(), async (req: Request, res: Response): Pro
     res.status(500).send('Error processing speech.');
   }
 });
+
+// TODO: Add a route to genmerate the practice evaluation result and the improvements on the conversation sentences.
+
+// TODO: Add a route to transmit back all the conversation history for a sessionId. 
+// All system messages should be filtered out.
 
 app.listen(3000, '0.0.0.0', () => {
   console.log('Server is running...');

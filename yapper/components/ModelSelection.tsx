@@ -4,15 +4,91 @@ import { MaterialIcons } from "@expo/vector-icons";
 
 const { ColorsPalette } = require("@/constants/colors.tsx");
 
+import logger from "@/components/Logger";
+
 type Props = {
-    setSelectedModel: Dispatch<SetStateAction<{ id: number; name: string; favoriteFood: string; age: number; avatar: any; scenario: string; fullImage: any } | undefined>>;
+    setSelectedModel: React.Dispatch<React.SetStateAction<{
+        id: number;
+        name: string;
+        favoriteFood: string;
+        age: number;
+        avatar: any;
+        scenario: string;
+        fullImage: any;
+    } | undefined>>
     selectedScenario: string;
-}
+};
+
+const monkResponse = {
+    socialScenario:
+        [
+            {
+                id: 1,
+                name: "Ray Liu",
+                favoriteFood: "Sushi",
+                age: 21,
+                avatar: require('@/assets/images/cropped-tom.jpg'),
+                scenario: "socialScenario",
+                fullImage: require('@/assets/images/full-tom.jpg'),
+            },
+            {
+                id: 2,
+                name: "Doraemon",
+                favoriteFood: "Dorayaki",
+                age: 1000000,
+                avatar: require('@/assets/images/cropped-doraemon.jpg'),
+                scenario: "socialScenario",
+                fullImage: require('@/assets/images/full-doraemon.jpg'),
+            },
+        ],
+    academicScenario:
+        [
+            {
+                id: 1,
+                name: "Einstein",
+                favoriteFood: "Strawberries",
+                age: 76,
+                avatar: require('@/assets/images/cropped-tom.jpg'),
+                scenario: "academicScenario",
+                fullImage: require('@/assets/images/full-tom.jpg'),
+            },
+            {
+                id: 2,
+                name: "Newton",
+                favoriteFood: "Apple",
+                age: 84,
+                avatar: require('@/assets/images/cropped-doraemon.jpg'),
+                scenario: "academicScenario",
+                fullImage: require('@/assets/images/full-doraemon.jpg'),
+            },
+        ],
+    casualScenario:
+        [
+            {
+                id: 1,
+                name: "Giannis",
+                favoriteFood: "Nuggets",
+                age: 29,
+                avatar: require('@/assets/images/cropped-tom.jpg'),
+                scenario: "casualScenario",
+                fullImage: require('@/assets/images/full-tom.jpg'),
+            },
+            {
+                id: 2,
+                name: "Maxey",
+                favoriteFood: "CheeseSteak",
+                age: 24,
+                avatar: require('@/assets/images/cropped-doraemon.jpg'),
+                scenario: "casualScenario",
+                fullImage: require('@/assets/images/full-doraemon.jpg'),
+            },
+        ]
+};
 
 type ScenarioKeys = keyof typeof monkResponse;
 
-export default function ModdlSelection({setSelectedModel, selectedScenario} : Props) {
-    const [propertiesList, setPropertiesList] = useState<{ id: number; name: string; favoriteFood: string; age: number; avatar: any; scenario: string; fullImage: any}[]>([]);
+export default function ModdlSelection({ setSelectedModel, selectedScenario }: Props) {
+    const [propertiesList, setPropertiesList] = useState<{ id: number; name: string; favoriteFood: string; age: number; avatar: any; scenario: string; fullImage: any; }[]>([]);
     const [index, setIndex] = useState<number>(0);
 
     useEffect(() => {
@@ -22,10 +98,13 @@ export default function ModdlSelection({setSelectedModel, selectedScenario} : Pr
         //     .then((data) => {
         //         setPropertiesList(data);
         //     });
-        setPropertiesList(monkResponse.Social);
-        setSelectedModel(monkResponse.Social[0]);
-    }
-    , []);
+        
+        setPropertiesList(monkResponse.socialScenario);
+        logger.info("Model Selection Component Mounted");
+        setSelectedModel(monkResponse.socialScenario[0]);
+        logger.info("Selected Model: " + monkResponse.socialScenario[0].name);
+    }, [selectedScenario, setSelectedModel]);
+
     useEffect(() => {
         console.log(selectedScenario);
         setPropertiesList(monkResponse[selectedScenario as ScenarioKeys]);
@@ -46,19 +125,19 @@ export default function ModdlSelection({setSelectedModel, selectedScenario} : Pr
         <View style={styles.componentWrapper}>
             {propertiesList.length > 0 && index < propertiesList.length && (
                 <>
-                <View style={styles.selectionContainer}>
-                    <TouchableOpacity onPress={handlePrevious}>
-                        <MaterialIcons name="arrow-left" size={96} color={ColorsPalette.PrimaryColorLight}/>
-                    </TouchableOpacity>
-                    <Image source={propertiesList[index].avatar} style={styles.avatar}/>
-                    <TouchableOpacity onPress={handleNext}>
-                        <MaterialIcons name="arrow-right" size={96} color={ColorsPalette.PrimaryColorLight}/>
-                    </TouchableOpacity>
-                </View>
-                    <Text style = {[styles.attribute, styles.name]}>{propertiesList[index].name}</Text>
-                    <Text style = {styles.attribute}>Favorite Food: {propertiesList[index].favoriteFood}</Text>
-                    <Text style = {styles.attribute}>Age: {propertiesList[index].age}</Text>
-                    <Text style = {styles.attribute}>Scenario: {propertiesList[index].scenario}</Text>
+                    <View style={styles.selectionContainer}>
+                        <TouchableOpacity onPress={handlePrevious}>
+                            <MaterialIcons name="arrow-left" size={96} color={ColorsPalette.PrimaryColorLight} />
+                        </TouchableOpacity>
+                        <Image source={propertiesList[index].avatar} style={styles.avatar} />
+                        <TouchableOpacity onPress={handleNext}>
+                            <MaterialIcons name="arrow-right" size={96} color={ColorsPalette.PrimaryColorLight} />
+                        </TouchableOpacity>
+                    </View>
+                    <Text style={[styles.attribute, styles.name]}>{propertiesList[index].name}</Text>
+                    <Text style={styles.attribute}>Favorite Food: {propertiesList[index].favoriteFood}</Text>
+                    <Text style={styles.attribute}>Age: {propertiesList[index].age}</Text>
+                    <Text style={styles.attribute}>Scenario: {propertiesList[index].scenario}</Text>
                 </>
             )}
         </View>
@@ -92,69 +171,3 @@ const styles = StyleSheet.create({
         fontSize: 24,
     }
 });
-
-const monkResponse = {
-    Social: 
-    [
-        {
-            id: 1,
-            name: "Ray Liu",
-            favoriteFood: "Sushi",
-            age: 21,
-            avatar: require('@/assets/images/cropped-tom.jpg'),
-            scenario: "Academic",
-            fullImage: require('@/assets/images/full-tom.jpg'),
-        },
-        {
-            id: 2,
-            name: "Doraemon",
-            favoriteFood: "Dorayaki",
-            age: 1000000,
-            avatar: require('@/assets/images/cropped-doraemon.jpg'),
-            scenario: "Social",
-            fullImage: require('@/assets/images/full-doraemon.jpg'),
-        },
-    ],
-    Academic: 
-    [
-        {
-            id: 1,
-            name: "Einstein",
-            favoriteFood: "Strawberries",
-            age: 76,
-            avatar: require('@/assets/images/cropped-tom.jpg'),
-            scenario: "Academic",
-            fullImage: require('@/assets/images/full-tom.jpg'),
-        },
-        {
-            id: 2,
-            name: "Newton",
-            favoriteFood: "Apple",
-            age: 84,
-            avatar: require('@/assets/images/cropped-doraemon.jpg'),
-            scenario: "Social",
-            fullImage: require('@/assets/images/full-doraemon.jpg'),
-        },
-    ],
-    Sports:
-    [
-        {
-            id: 1,
-            name: "Giannis",
-            favoriteFood: "Nuggets",
-            age: 29,
-            avatar: require('@/assets/images/cropped-tom.jpg'),
-            scenario: "Academic",
-            fullImage: require('@/assets/images/full-tom.jpg'),
-        },
-        {
-            id: 2,
-            name: "Maxey",
-            favoriteFood: "CheeseSteak",
-            age: 24,
-            avatar: require('@/assets/images/cropped-doraemon.jpg'),
-            scenario: "Social",
-            fullImage: require('@/assets/images/full-doraemon.jpg'),
-        },
-    ]
-};

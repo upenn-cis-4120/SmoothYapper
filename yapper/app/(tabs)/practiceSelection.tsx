@@ -20,15 +20,15 @@ export default function PracticeSelection() {
         fullImage: any;
     } | undefined>(undefined);
 
-    const [selectedScenario, setSelectedScenario] = useState<string>("Social");
+    const [selectedScenario, setSelectedScenario] = useState<string>("socialScenario");
     const [scenarios, setScenarios] = useState<string[]>([]);
     const [isPickerVisible, setIsPickerVisible] = useState(false);
     const [dropdownPosition, setDropdownPosition] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
 
     useEffect(() => {
-        const monkResponse = ["Social", "Academic", "Sports"];
+        const monkResponse = ["socialScenario", "academicScenario", "casualScenario"];
         setScenarios(monkResponse);
-        setSelectedScenario("Social");
+        setSelectedScenario("socialScenario");
     }, []);
 
     const handleButtonLayout = (event: any) => {

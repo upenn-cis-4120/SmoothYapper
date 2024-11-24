@@ -6,18 +6,29 @@ const { ColorsPalette } = require("@/constants/colors.tsx");
 import RatingDisplay from '@/components/StarRating';
 import { useTabContext } from '@/contexts/TabContext';
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useEffect } from "react";
+
+import baseURI from "@/constants/host";
 
 export default function PracticeResult() {
 
-    const { modelData, practiceResultData, sampleMessageData } = useLocalSearchParams();
+    const { modelData, practiceResultData, sessionId } = useLocalSearchParams();
     console.log(`Model Data: ${modelData}`);
     console.log(`Practice Result Data: ${practiceResultData}`);
-    console.log(`Sample Message Data: ${sampleMessageData}`);
+    console.log(`Sample Message Data: ${sessionId}`);
     const parsedModel = JSON.parse(decodeURIComponent(typeof modelData === "string" ? modelData : modelData[0]));
     const parsedPracticeResult = JSON.parse(decodeURIComponent(typeof practiceResultData === "string" ? practiceResultData : practiceResultData[0]));
     console.log(parsedPracticeResult);
-    const messages = JSON.parse(decodeURIComponent(typeof sampleMessageData === "string" ? sampleMessageData : sampleMessageData[0]));
-    console.log(messages);
+
+    // TODO: Receive the sessionId from the previous pactice page, fetching the practice conversaiton history and results.
+
+    useEffect(() => {
+        const getSessionHistory = async () => {
+            const histotyResponse = await fetch(`${baseURI}/practice/${sessionId}`);
+            const historyData = await histotyResponse.json();
+            
+        };
+    }, [sessionId]);
 
     const { setPageAParams } = useTabContext();
 

@@ -17,8 +17,9 @@ import Timer from "@/components/Timer";
 import Message from "@/components/Message";
 import AudioRecorder from "@/components/AudioRecorder";
 import AudioPlayer from "@/components/AudioPlayer";
+import logger from "@/components/Logger";
 
-const baseURL = "http://100.110.220.66:3000";
+const baseURL = "http://10.103.172.144:3000";
 
 export default function Practice() {
     const { modelData } = useLocalSearchParams();
@@ -27,6 +28,8 @@ export default function Practice() {
     const [timerActive, setTimerActive] = useState(true);
     const [isInitialMount, setIsInitialMount] = useState(true); 
     const parsedModel = JSON.parse(decodeURIComponent(typeof modelData === "string" ? modelData : modelData[0]));
+    logger.info(`Model Data: ${parsedModel}`);
+    logger.info(`Model Data: ${parsedModel.name}`);
     const [isRecording, setIsRecording] = useState(false);
     const [messages, setMessages] = useState<MessageType[]>([]);
     const [isSessionActive, setIsSessionActive] = useState(true);
@@ -57,7 +60,7 @@ export default function Practice() {
     const recordingMessage : MessageType = {
         id: messages.length+1,
         type: "sent",
-        text: "Recording...",
+        text: "Transcribing...",
         sentences: [
             {
                 content: "Recording...",
@@ -80,10 +83,12 @@ export default function Practice() {
 
     useEffect(() => {
         const getSessionId = async () => {
+            logger.info("Initiating session...");
+            logger.info(`Scenario: ${parsedModel.scenario}`);
             const response = await axios.post(`${baseURL}/initChat`, {
-                scenario : "Academic",
+                scenario : parsedModel.scenario,
             });
-            console.log(`SessionId: ${response.data.sessionId}`);
+            logger.info(`Session inited, sessionId: ${response.data.sessionId}`);
             sessionIdRef.current = response.data.sessionId;
         };
 
@@ -111,7 +116,7 @@ export default function Practice() {
                 });
 
                 const transcription = await response.json();
-                console.log(`Transcription: ${transcription.text}`);
+                logger.info(`Transcription: ${transcription.text}`);
                 
                 const message: MessageType = {
                     id: messages.length+1,
@@ -127,7 +132,7 @@ export default function Practice() {
                     timestamp: new Date().toISOString(),
                     avatar: "@/assets/images/cropped-tom.jpg",
                 };
-                console.log(`Message: ${message.text}`);
+                logger.info(`Parsed Message: ${message}`);
                 setTranscribing(false);
                 setMessages((prevMessages) => [...prevMessages, message]);
                 setLatestUserMessage(transcription.text);
@@ -157,11 +162,12 @@ export default function Practice() {
                     body: formData as any,
                 });
                 if(!textResponse.ok) {
-                    console.error(`GPT Response Error: ${textResponse.text}`);
+                    const responseJson = await textResponse.json();
+                    logger.error(`Error ${responseJson.error.code}: ${responseJson.error.message}`);
                     return;
                 }
                 const textResponseJson = await textResponse.json();
-                console.log(`GPT Response: ${textResponseJson.message}`);
+                logger.info(`Text Response: ${textResponseJson.message}`);
                 
                 const ttsResponse = await fetch(`${baseURL}/speech`, {
                     method: 'POST',
@@ -184,7 +190,8 @@ export default function Practice() {
                 });
                 console.log("Setting TTS Audio URI: ", fileUri);
                 setTtsAudioUri(fileUri);
-
+                // FIXME: The audio player is not playing the audio when reentering the practice after a seccion ends
+                // FIXME: The period symbols are missing at the end of each sentence
                 setMessages((prevMessages) => [
                     ...prevMessages,
                     {
@@ -192,10 +199,11 @@ export default function Practice() {
                         type: "received",
                         text: textResponseJson.message,
                         sentences: textResponseJson.message
-                            .split('. ') // Example splitting by sentences
+                            // FIXME: Do not handle sentences ending with other symbols
+                            .split('. ')
                             .map((content: string, index: number) => ({
                             content,
-                            highlight: false, // or some logic to determine highlighting
+                            highlight: false,
                             index,
                         })),
                         timestamp: new Date().toISOString(),
@@ -324,6 +332,11 @@ export default function Practice() {
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.outlinedButton} onPress={() => {
                         // TODO: Init an end session request
+                        // however, the sessionId should not be deleted from Redis
+                        // The sessionId should be deleted when the user ends the whole practice 
+                        // aftering viewing the results and feedback
+                        // TODO: Also pass the sessionId to the result page for the user to view the results
+                        // FIXME: Check the resources cleanning and the session cleanning, which leads to existing bugs in no sounds and bad session state
                         console.log("End button pressed");
                         setElapsedTime(0);
                         setTimerActive(false);
@@ -340,7 +353,7 @@ export default function Practice() {
                                     language: 3,
                                     topic: 2,
                                 })),
-                                sampleMessageData: encodeURIComponent(JSON.stringify(sampleMessages)),
+                                sessionId: sessionIdRef.current,
                             },
                         });
                     }}>

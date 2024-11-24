@@ -9,6 +9,8 @@ import { useEffect } from "react";
 const { ColorsPalette } = require("@/constants/colors.tsx");
 
 export default function Transcripts() {
+    // TODO: Randomly select several long-enough sentences from the conversation history
+    // TODO: Display the selected sentences in highlight and ask for improvements from chatGPT
     const { pageAParams } = useTabContext();
     console.log("Transcripts Page");
     // const { transcriptsData } = useLocalSearchParams();
