@@ -1,6 +1,6 @@
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { Modal, View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
 import { Picker } from "@react-native-picker/picker";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { MaterialIcons } from "@expo/vector-icons";
 
 import ModelSelection from "@/components/ModelSelection";
@@ -24,6 +24,8 @@ export default function PracticeSelection() {
     const [scenarios, setScenarios] = useState<string[]>([]);
     const [isPickerVisible, setIsPickerVisible] = useState(false);
     const [dropdownPosition, setDropdownPosition] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
+    const [isModalVisible, setIsModalVisible] = useState(false);
+    const firstLaunch = useRef(true);
 
     useEffect(() => {
         const monkResponse = ["socialScenario", "academicScenario", "casualScenario"];
@@ -31,13 +33,72 @@ export default function PracticeSelection() {
         setSelectedScenario("socialScenario");
     }, []);
 
+    useEffect(() => {
+        if(firstLaunch.current) {
+            firstLaunch.current = false;
+            return;
+        }
+        // Open a modal to display the selected model
+        if (selectedModel) {
+            setIsModalVisible(true); // Open the modal when a model is selected
+        }
+    }, [selectedModel]);
+
     const handleButtonLayout = (event: any) => {
         const { x, y, height } = event.nativeEvent.layout;
         setDropdownPosition({ top: y + height, left: x });
     };
 
+    const handleModelSelection = (model: any) => {
+        setSelectedModel(model); // Update the selected model
+        setIsModalVisible(true); // Open the modal
+    };
+
     return (
         <SafeAreaView style={styles.componentWrapper}>
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={isModalVisible}
+                onRequestClose={() => setIsModalVisible(false)} // Close modal when requested
+            >
+                    <View style={styles.modalOverlay}>
+                    <View style={styles.modalContent}>
+                        {selectedModel && (
+                            <>
+                                <Image source={selectedModel.avatar} style={styles.modalImage} />
+                                <Text style={styles.modalTitle}>{selectedModel.name}</Text>
+                                <Text style={styles.modalText}>Favorite Food: {selectedModel.favoriteFood}</Text>
+                                <Text style={styles.modalText}>Age: {selectedModel.age}</Text>
+                                <Text style={styles.modalText}>Scenario: {selectedModel.scenario}</Text>
+                                <TouchableOpacity
+                                    onPress={() => setIsModalVisible(false)} // Close modal
+                                    style={styles.closeButton}
+                                >
+                                    <Text style={styles.closeButtonText}>Close</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    onPress={() => {
+                                        console.log("Play button pressed");
+                                        console.log(selectedModel);
+                                        setIsModalVisible(false);
+                                        firstLaunch.current = true;
+                                        router.replace({
+                                            pathname: "/(tabs)/practice",
+                                            params: {
+                                                modelData: encodeURIComponent(JSON.stringify(selectedModel)),
+                                            },
+                                        });
+                                    }}
+                                    style={styles.closeButton}  
+                                >
+                                    <Text style={styles.closeButtonText}>Start</Text>
+                                </TouchableOpacity>
+                            </>
+                        )}
+                    </View>
+                </View>
+            </Modal>
             <View style={styles.scenarioSelectionWrapper}>
                 <Text style={styles.label}>Select Scenario:</Text>
                 <TouchableOpacity
@@ -87,24 +148,8 @@ export default function PracticeSelection() {
             </View>
 
             <View style={styles.modelSelectionWrapper}>
-                <ModelSelection setSelectedModel={setSelectedModel} selectedScenario={selectedScenario} />
+                <ModelSelection handleModelSelection={handleModelSelection} selectedScenario={selectedScenario} />
             </View>
-
-            <TouchableOpacity
-                style={styles.playButton}
-                onPress={() => {
-                    console.log("Play button pressed");
-                    console.log(selectedModel);
-                    router.replace({
-                        pathname: "/(tabs)/practice",
-                        params: {
-                            modelData: encodeURIComponent(JSON.stringify(selectedModel)),
-                        },
-                    });
-                }}
-            >
-                <MaterialIcons name="play-circle-outline" size={128} color={ColorsPalette.PrimaryColorLight} />
-            </TouchableOpacity>
         </SafeAreaView>
     );
 }
@@ -115,7 +160,6 @@ const styles = StyleSheet.create({
         backgroundColor: ColorsPalette.FullWhite,
     },
     scenarioSelectionWrapper: {
-        marginBottom: 20,
         alignItems: "center",
         justifyContent: "center",
         flex: 1,
@@ -124,8 +168,9 @@ const styles = StyleSheet.create({
     modelSelectionWrapper: {
         flex: 2,
         width: "100%",
-        justifyContent: "center",
-        alignItems: "center",
+        height: "100%",
+        // justifyContent: "center",
+        // alignItems: "center",
     },
     label: {
         fontSize: 18,
@@ -144,7 +189,6 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         paddingHorizontal: 10,
         backgroundColor: ColorsPalette.FullWhite,
-        elevation: 2, // Shadow for Android
     },
     dropdownContainer: {
         position: "absolute",
@@ -152,27 +196,57 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: ColorsPalette.PrimaryColorLight,
         borderRadius: 8,
-        elevation: 3, // Shadow for Android
         zIndex: 2, // Ensure it overlays other elements
-    },
-    picker: {
-        width: "100%",
-        height: 150,
-    },
-    pickerItem: {
-        fontSize: 16,
-        color: ColorsPalette.PrimaryColorDeep,
-    },
-    playButton: {
-        marginTop: 20,
-        padding: 10,
-        backgroundColor: ColorsPalette.FullWhite,
-        borderRadius: 8,
-        alignSelf: "center",
     },
     buttonText: {
         fontSize: 16,
         color: ColorsPalette.PrimaryColorLight,
+        fontWeight: "bold",
+    },
+    modalOverlay: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "rgba(0, 0, 0, 0.5)", // Semi-transparent background
+    },
+    modalContent: {
+        width: "80%",
+        backgroundColor: ColorsPalette.FullWhite,
+        borderRadius: 10,
+        padding: 20,
+        alignItems: "center",
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5, // Shadow for Android
+    },
+    modalImage: {
+        width: 150,
+        height: 150,
+        borderRadius: 10,
+        marginBottom: 20,
+    },
+    modalTitle: {
+        fontSize: 20,
+        fontWeight: "bold",
+        marginBottom: 10,
+        color: ColorsPalette.PrimaryColorLight,
+    },
+    modalText: {
+        fontSize: 16,
+        marginBottom: 10,
+        color: ColorsPalette.PrimaryColorDeep,
+    },
+    closeButton: {
+        marginTop: 20,
+        backgroundColor: ColorsPalette.PrimaryColorLight,
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        borderRadius: 5,
+    },
+    closeButtonText: {
+        color: ColorsPalette.FullWhite,
         fontWeight: "bold",
     },
 });
