@@ -16,19 +16,18 @@ export default function PracticeSelection() {
         favoriteFood: string;
         age: number;
         avatar: any;
-        scenario: string;
         fullImage: any;
     } | undefined>(undefined);
 
-    const [selectedScenario, setSelectedScenario] = useState<string>("socialScenario");
+    const [selectedScenario, setSelectedScenario] = useState<string>("Social");
     const [scenarios, setScenarios] = useState<string[]>([]);
     const [isPickerVisible, setIsPickerVisible] = useState(false);
     const [dropdownPosition, setDropdownPosition] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
 
     useEffect(() => {
-        const monkResponse = ["socialScenario", "academicScenario", "casualScenario"];
+        const monkResponse = ["Social", "Academic", "Causal"];
         setScenarios(monkResponse);
-        setSelectedScenario("socialScenario");
+        setSelectedScenario("Social");
     }, []);
 
     const handleButtonLayout = (event: any) => {
@@ -99,6 +98,7 @@ export default function PracticeSelection() {
                         pathname: "/(tabs)/practice",
                         params: {
                             modelData: encodeURIComponent(JSON.stringify(selectedModel)),
+                            scenario: selectedScenario,
                         },
                     });
                 }}

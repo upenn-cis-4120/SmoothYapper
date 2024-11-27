@@ -16,7 +16,7 @@ type ChatbotScenarios = {
 };
 
 const chatbotScenarios: ChatbotScenarios = {
-    academicScenario: {
+    Academic: {
         scenario: "academic",
         description: "A chatbot that assists with academic queries, explains concepts, helps with assignments, or discusses research topics.",
         tone: "formal, knowledgeable, encouraging",
@@ -50,7 +50,7 @@ const chatbotScenarios: ChatbotScenarios = {
             }
         ]
     },
-    socialScenario: {
+    Social: {
         scenario: "social",
         description: "A chatbot for casual social interactions, focusing on friendly and supportive conversations.",
         tone: "friendly, engaging, supportive",
@@ -81,7 +81,7 @@ const chatbotScenarios: ChatbotScenarios = {
             }
         ]
     },
-    casualScenario: {
+    Causal: {
         scenario: "casual",
         description: "A chatbot for everyday small talk and lighthearted conversations.",
         tone: "relaxed, conversational, cheerful",
@@ -110,7 +110,7 @@ const chatbotScenarios: ChatbotScenarios = {
             }
         ]
     },
-    professionalScenario: {
+    Professional: {
         scenario: "professional",
         description: "A chatbot for career advice, workplace discussions, and productivity tips.",
         tone: "polite, formal, informative",

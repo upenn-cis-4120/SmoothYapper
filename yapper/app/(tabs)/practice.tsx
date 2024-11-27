@@ -10,7 +10,7 @@ import * as FileSystem from 'expo-file-system';
 import { Message as MessageType } from "@/types/Message";
 
 const { ColorsPalette } = require("@/constants/colors.tsx");
-import sampleMessages from '@/assets/sampleData/MessageSamples';
+import baseURL from "@/constants/baseURL";
 
 import HintModal from "@/components/HintModal";
 import Timer from "@/components/Timer";
@@ -19,17 +19,18 @@ import AudioRecorder from "@/components/AudioRecorder";
 import AudioPlayer from "@/components/AudioPlayer";
 import logger from "@/components/Logger";
 
-const baseURL = "http://10.103.172.144:3000";
-
 export default function Practice() {
-    const { modelData } = useLocalSearchParams();
-    const [ hintOpen, setHintOpen ] = useState(false);
+    const { modelData, scenario } = useLocalSearchParams();
+    const [ hintOpen, setHintOpen ] = useState(true);
     const [elapsedTime, setElapsedTime] = useState(0);
     const [timerActive, setTimerActive] = useState(true);
     const [isInitialMount, setIsInitialMount] = useState(true); 
     const parsedModel = JSON.parse(decodeURIComponent(typeof modelData === "string" ? modelData : modelData[0]));
-    logger.info(`Model Data: ${parsedModel}`);
-    logger.info(`Model Data: ${parsedModel.name}`);
+    const hintContents = [
+        "Current Scenario: " + scenario,
+        "Pick a random topic and talk about it. When you are ready, press the record button to start recording.",
+        "When you are done, press the record button again to stop recording.",
+    ]
     const [isRecording, setIsRecording] = useState(false);
     const [messages, setMessages] = useState<MessageType[]>([]);
     const [isSessionActive, setIsSessionActive] = useState(true);
@@ -84,9 +85,9 @@ export default function Practice() {
     useEffect(() => {
         const getSessionId = async () => {
             logger.info("Initiating session...");
-            logger.info(`Scenario: ${parsedModel.scenario}`);
+            logger.info(`Scenario: ${scenario}`);
             const response = await axios.post(`${baseURL}/initChat`, {
-                scenario : parsedModel.scenario,
+                scenario : scenario,
             });
             logger.info(`Session inited, sessionId: ${response.data.sessionId}`);
             sessionIdRef.current = response.data.sessionId;
@@ -335,7 +336,6 @@ export default function Practice() {
                         // however, the sessionId should not be deleted from Redis
                         // The sessionId should be deleted when the user ends the whole practice 
                         // aftering viewing the results and feedback
-                        // TODO: Also pass the sessionId to the result page for the user to view the results
                         // FIXME: Check the resources cleanning and the session cleanning, which leads to existing bugs in no sounds and bad session state
                         console.log("End button pressed");
                         setElapsedTime(0);
@@ -423,7 +423,7 @@ export default function Practice() {
                     </TouchableOpacity>
                 </View>
             </View>
-            <HintModal isVisible= {hintOpen} hintContents={["Hint 1: You only live once", "Hint 2: Never choose math courses"]} onClose={() => {
+            <HintModal isVisible= {hintOpen} hintContents={hintContents} onClose={() => {
                 console.log("Hint modal closed");
                 setHintOpen(false);
                 setTimerActive(true);

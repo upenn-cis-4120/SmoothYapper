@@ -10,6 +10,7 @@ import bodyParser from 'body-parser';
 import { createClient } from 'redis';
 import { v4 as uuidV4 } from 'uuid';
 
+
 import { chatbotScenarios, Scenario, ExamplePrompt } from "./modelParameters";
 
 configDotenv();
@@ -73,7 +74,7 @@ interface ConversationEntry {
 type ConversationHistory = ConversationEntry[];
 
 app.post('/endChat', fileStorage.none(), async (req: Request, res: Response) => {
-  const sessionId = req.body.sessionId;
+  const sessionId = req.body.sessionId as string;
   if (!sessionId) {
     res.status(400).send('Missing sessionId.');
     return;
@@ -85,8 +86,10 @@ app.post('/endChat', fileStorage.none(), async (req: Request, res: Response) => 
     return;
   }
 
-  await redisClient.del(sessionId);
-  res.json({ message: 'Session ended.' });
+  const sessionDataJson = JSON.parse(sessionData);
+  const conversationWithoutSystemMessages = sessionDataJson.filter((entry: ConversationEntry) => entry.role !== 'system');
+
+  res.json({ conversation: conversationWithoutSystemMessages });
 });
 
 app.post('/initChat', fileStorage.none() ,async (req: Request, res: Response) => {
@@ -194,8 +197,25 @@ app.post('/speech', fileStorage.none(), async (req: Request, res: Response): Pro
 
 // TODO: Add a route to genmerate the practice evaluation result and the improvements on the conversation sentences.
 
-// TODO: Add a route to transmit back all the conversation history for a sessionId. 
-// All system messages should be filtered out.
+app.get('/practice/:id', async (req: Request, res: Response) => {
+  const sessionId = req.params.id;
+  if (!sessionId) {
+    res.status(400).send('Missing sessionId.');
+    return;
+  }
+
+  console.log("Session ID: ", sessionId);
+
+  const sessionData = await redisClient.get(sessionId);
+  if (!sessionData) {
+    res.status(400).send('Session not found.');
+    return;
+  }
+
+  const conversationHistory: ConversationHistory = JSON.parse(sessionData) || [];
+  const messagesWithoutSystem = conversationHistory.filter((entry: ConversationEntry) => entry.role !== 'system');
+  res.json({ messages: messagesWithoutSystem });
+});
 
 app.listen(3000, '0.0.0.0', () => {
   console.log('Server is running...');

@@ -8,7 +8,7 @@ import { useTabContext } from '@/contexts/TabContext';
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useEffect } from "react";
 
-import baseURI from "@/constants/host";
+import baseURL from "@/constants/baseURL";
 
 export default function PracticeResult() {
 
@@ -19,18 +19,6 @@ export default function PracticeResult() {
     const parsedModel = JSON.parse(decodeURIComponent(typeof modelData === "string" ? modelData : modelData[0]));
     const parsedPracticeResult = JSON.parse(decodeURIComponent(typeof practiceResultData === "string" ? practiceResultData : practiceResultData[0]));
     console.log(parsedPracticeResult);
-
-    // TODO: Receive the sessionId from the previous pactice page, fetching the practice conversaiton history and results.
-
-    useEffect(() => {
-        const getSessionHistory = async () => {
-            const histotyResponse = await fetch(`${baseURI}/practice/${sessionId}`);
-            const historyData = await histotyResponse.json();
-            
-        };
-    }, [sessionId]);
-
-    const { setPageAParams } = useTabContext();
 
     return (
         <SafeAreaView style={styles.feedbackContainer}>
@@ -53,11 +41,10 @@ export default function PracticeResult() {
             </View>
             <View style={styles.feedbackButtonContainer}>
                 <TouchableOpacity style={styles.feedbackButtons} onPress={ () => {
-                    setPageAParams(messages);
                     router.replace({
                         pathname: "/(tabs)/transcripts",
                         params: {
-                            transcriptsData: encodeURIComponent(JSON.stringify(messages)),
+                            sessionId: sessionId,
                         }
                     })
                 }}>

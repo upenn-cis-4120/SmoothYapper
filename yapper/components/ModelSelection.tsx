@@ -13,14 +13,13 @@ type Props = {
         favoriteFood: string;
         age: number;
         avatar: any;
-        scenario: string;
         fullImage: any;
     } | undefined>>
     selectedScenario: string;
 };
 
 const monkResponse = {
-    socialScenario:
+    Social:
         [
             {
                 id: 1,
@@ -28,7 +27,6 @@ const monkResponse = {
                 favoriteFood: "Sushi",
                 age: 21,
                 avatar: require('@/assets/images/cropped-tom.jpg'),
-                scenario: "socialScenario",
                 fullImage: require('@/assets/images/full-tom.jpg'),
             },
             {
@@ -37,11 +35,10 @@ const monkResponse = {
                 favoriteFood: "Dorayaki",
                 age: 1000000,
                 avatar: require('@/assets/images/cropped-doraemon.jpg'),
-                scenario: "socialScenario",
                 fullImage: require('@/assets/images/full-doraemon.jpg'),
             },
         ],
-    academicScenario:
+    Academic:
         [
             {
                 id: 1,
@@ -49,7 +46,6 @@ const monkResponse = {
                 favoriteFood: "Strawberries",
                 age: 76,
                 avatar: require('@/assets/images/cropped-tom.jpg'),
-                scenario: "academicScenario",
                 fullImage: require('@/assets/images/full-tom.jpg'),
             },
             {
@@ -58,11 +54,10 @@ const monkResponse = {
                 favoriteFood: "Apple",
                 age: 84,
                 avatar: require('@/assets/images/cropped-doraemon.jpg'),
-                scenario: "academicScenario",
                 fullImage: require('@/assets/images/full-doraemon.jpg'),
             },
         ],
-    casualScenario:
+    Causal:
         [
             {
                 id: 1,
@@ -70,7 +65,6 @@ const monkResponse = {
                 favoriteFood: "Nuggets",
                 age: 29,
                 avatar: require('@/assets/images/cropped-tom.jpg'),
-                scenario: "casualScenario",
                 fullImage: require('@/assets/images/full-tom.jpg'),
             },
             {
@@ -79,7 +73,6 @@ const monkResponse = {
                 favoriteFood: "CheeseSteak",
                 age: 24,
                 avatar: require('@/assets/images/cropped-doraemon.jpg'),
-                scenario: "casualScenario",
                 fullImage: require('@/assets/images/full-doraemon.jpg'),
             },
         ]
@@ -88,7 +81,7 @@ const monkResponse = {
 type ScenarioKeys = keyof typeof monkResponse;
 
 export default function ModdlSelection({ setSelectedModel, selectedScenario }: Props) {
-    const [propertiesList, setPropertiesList] = useState<{ id: number; name: string; favoriteFood: string; age: number; avatar: any; scenario: string; fullImage: any; }[]>([]);
+    const [propertiesList, setPropertiesList] = useState<{ id: number; name: string; favoriteFood: string; age: number; avatar: any; fullImage: any; }[]>([]);
     const [index, setIndex] = useState<number>(0);
 
     useEffect(() => {
@@ -99,10 +92,10 @@ export default function ModdlSelection({ setSelectedModel, selectedScenario }: P
         //         setPropertiesList(data);
         //     });
         
-        setPropertiesList(monkResponse.socialScenario);
+        setPropertiesList(monkResponse.Social);
         logger.info("Model Selection Component Mounted");
-        setSelectedModel(monkResponse.socialScenario[0]);
-        logger.info("Selected Model: " + monkResponse.socialScenario[0].name);
+        setSelectedModel(monkResponse.Social[0]);
+        logger.info("Selected Model: " + monkResponse.Social[0].name);
     }, [selectedScenario, setSelectedModel]);
 
     useEffect(() => {
@@ -137,7 +130,6 @@ export default function ModdlSelection({ setSelectedModel, selectedScenario }: P
                     <Text style={[styles.attribute, styles.name]}>{propertiesList[index].name}</Text>
                     <Text style={styles.attribute}>Favorite Food: {propertiesList[index].favoriteFood}</Text>
                     <Text style={styles.attribute}>Age: {propertiesList[index].age}</Text>
-                    <Text style={styles.attribute}>Scenario: {propertiesList[index].scenario}</Text>
                 </>
             )}
         </View>
@@ -157,9 +149,9 @@ const styles = StyleSheet.create({
         padding: 20,
     },
     avatar: {
-        width: 256,
-        height: 256,
-        borderRadius: 128,
+        width: 212,
+        height: 212,
+        borderRadius: 106,
         borderColor: ColorsPalette.SecondaryColorDeep,
         borderWidth: 5,
     },

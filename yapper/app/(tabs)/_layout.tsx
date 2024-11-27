@@ -41,9 +41,9 @@ export default function TabLayout() {
             />
 
             <Tabs.Screen 
-                name="learn" 
+                name="dashboard" 
                 options={{
-                    title: "Learn",
+                    title: "Dashboard",
                     tabBarIcon: ({ color, focused }) => (
                         <MaterialCommunityIcons name={ focused ? "book-multiple" : "book-multiple-outline"} size={64} color={color} />
                     ),
