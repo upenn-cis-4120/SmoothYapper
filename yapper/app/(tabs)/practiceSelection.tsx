@@ -4,10 +4,11 @@ import { useEffect, useState } from "react";
 import { MaterialIcons } from "@expo/vector-icons";
 
 import ModelSelection from "@/components/ModelSelection";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const { ColorsPalette } = require("@/constants/colors.tsx");
+import Logger from "@/components/Logger";
 
 export default function PracticeSelection() {
     const [selectedModel, setSelectedModel] = useState<{
@@ -18,17 +19,36 @@ export default function PracticeSelection() {
         avatar: any;
         fullImage: any;
     } | undefined>(undefined);
+    
+    const { scenario } = useLocalSearchParams();
 
-    const [selectedScenario, setSelectedScenario] = useState<string>("Social");
+    const [selectedScenario, setSelectedScenario] = useState<string>(scenario as string);
     const [scenarios, setScenarios] = useState<string[]>([]);
     const [isPickerVisible, setIsPickerVisible] = useState(false);
     const [dropdownPosition, setDropdownPosition] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
 
     useEffect(() => {
-        const monkResponse = ["Social", "Academic", "Causal"];
+        const monkResponse = ["Social", "Academic", "Sports"];
         setScenarios(monkResponse);
-        setSelectedScenario("Social");
+        setSelectedScenario(scenario as string);
     }, []);
+
+    useEffect(() => {
+        Logger.info(`Param scenario: ${scenario}`);
+        Logger.info(`Selected scenario: ${selectedScenario}`);
+        if(scenario === "Random"){
+            const randomNum = Math.random();
+            if(randomNum < 0.33){
+                setSelectedScenario("Social");
+            } else if(randomNum < 0.66){
+                setSelectedScenario("Academic");
+            } else {
+                setSelectedScenario("Sports");
+            }
+        } else {
+            setSelectedScenario(scenario as string);
+        }
+    }, [scenario]);
 
     const handleButtonLayout = (event: any) => {
         const { x, y, height } = event.nativeEvent.layout;
@@ -130,6 +150,7 @@ const styles = StyleSheet.create({
     label: {
         fontSize: 18,
         fontWeight: "bold",
+        fontFamily: "NunitoSans_10pt-Black",
         color: ColorsPalette.PrimaryColorLight,
         marginBottom: 10,
     },
@@ -158,6 +179,7 @@ const styles = StyleSheet.create({
     picker: {
         width: "100%",
         height: 150,
+        fontFamily: "NunitoSans_10pt-Regular",
     },
     pickerItem: {
         fontSize: 16,
@@ -172,6 +194,7 @@ const styles = StyleSheet.create({
     },
     buttonText: {
         fontSize: 16,
+        fontFamily: "NunitoSans_10pt-Black",
         color: ColorsPalette.PrimaryColorLight,
         fontWeight: "bold",
     },

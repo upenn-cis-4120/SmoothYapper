@@ -41,10 +41,12 @@ export default function PracticeResult() {
             </View>
             <View style={styles.feedbackButtonContainer}>
                 <TouchableOpacity style={styles.feedbackButtons} onPress={ () => {
+                    console.log(`Parsed model: ${parsedModel}`);
                     router.replace({
                         pathname: "/(tabs)/transcripts",
                         params: {
                             sessionId: sessionId,
+                            modelAvatarLink: parsedModel.avatar,
                         }
                     })
                 }}>

@@ -26,38 +26,38 @@ const monkResponse = {
                 name: "Ray Liu",
                 favoriteFood: "Sushi",
                 age: 21,
-                avatar: require('@/assets/images/cropped-tom.jpg'),
-                fullImage: require('@/assets/images/full-tom.jpg'),
+                avatar: require('@/assets/images/memoji-1.png'),
+                fullImage: require('@/assets/images/memoji-1.png'),
             },
             {
                 id: 2,
-                name: "Doraemon",
+                name: "Jose",
                 favoriteFood: "Dorayaki",
-                age: 1000000,
-                avatar: require('@/assets/images/cropped-doraemon.jpg'),
-                fullImage: require('@/assets/images/full-doraemon.jpg'),
+                age: 24,
+                avatar: require('@/assets/images/memoji-2.png'),
+                fullImage: require('@/assets/images/memoji-2.png'),
             },
         ],
     Academic:
         [
             {
                 id: 1,
-                name: "Einstein",
+                name: "Aaliyah",
                 favoriteFood: "Strawberries",
-                age: 76,
-                avatar: require('@/assets/images/cropped-tom.jpg'),
-                fullImage: require('@/assets/images/full-tom.jpg'),
+                age: 36,
+                avatar: require('@/assets/images/memoji-3.png'),
+                fullImage: require('@/assets/images/memoji-3.png'),
             },
             {
                 id: 2,
-                name: "Newton",
+                name: "Kim",
                 favoriteFood: "Apple",
-                age: 84,
-                avatar: require('@/assets/images/cropped-doraemon.jpg'),
-                fullImage: require('@/assets/images/full-doraemon.jpg'),
+                age: 18,
+                avatar: require('@/assets/images/memoji-4.png'),
+                fullImage: require('@/assets/images/memoji-4.png'),
             },
         ],
-    Causal:
+    Sports:
         [
             {
                 id: 1,
@@ -80,31 +80,27 @@ const monkResponse = {
 
 type ScenarioKeys = keyof typeof monkResponse;
 
-export default function ModdlSelection({ setSelectedModel, selectedScenario }: Props) {
-    const [propertiesList, setPropertiesList] = useState<{ id: number; name: string; favoriteFood: string; age: number; avatar: any; fullImage: any; }[]>([]);
+export default function ModelSelection({ setSelectedModel, selectedScenario }: Props) {
+    const [propertiesList, setPropertiesList] = useState<
+        { id: number; name: string; favoriteFood: string; age: number; avatar: any; fullImage: any }[]
+    >([]);
     const [index, setIndex] = useState<number>(0);
 
     useEffect(() => {
-        // Fetch data from the server
-        // fetch("https://api.example.com/properties")
-        //     .then((response) => response.json())
-        //     .then((data) => {
-        //         setPropertiesList(data);
-        //     });
-        
-        setPropertiesList(monkResponse.Social);
-        logger.info("Model Selection Component Mounted");
-        setSelectedModel(monkResponse.Social[0]);
-        logger.info("Selected Model: " + monkResponse.Social[0].name);
+        const scenarioList = monkResponse[selectedScenario as ScenarioKeys];
+        if (scenarioList) {
+            setPropertiesList(scenarioList);
+            setSelectedModel(scenarioList[0]); // Default to the first model
+        } else {
+            setPropertiesList([]); // Handle edge cases where scenario doesn't exist
+        }
     }, [selectedScenario, setSelectedModel]);
 
     useEffect(() => {
-        console.log(selectedScenario);
-        setPropertiesList(monkResponse[selectedScenario as ScenarioKeys]);
         if (propertiesList.length > 0) {
             setSelectedModel(propertiesList[index]);
         }
-    }, [index, setSelectedModel, selectedScenario]);
+    }, [index, propertiesList, setSelectedModel]);
 
     const handlePrevious = () => {
         setIndex((prevIndex) => (prevIndex - 1 + propertiesList.length) % propertiesList.length);
@@ -114,28 +110,33 @@ export default function ModdlSelection({ setSelectedModel, selectedScenario }: P
         setIndex((prevIndex) => (prevIndex + 1) % propertiesList.length);
     };
 
+    if (propertiesList.length === 0 || index >= propertiesList.length) {
+        // Safeguard against accessing out-of-bounds or undefined data
+        return (
+            <View style={styles.componentWrapper}>
+                <Text style={styles.attribute}>No models available for this scenario.</Text>
+            </View>
+        );
+    }
+
     return (
         <View style={styles.componentWrapper}>
-            {propertiesList.length > 0 && index < propertiesList.length && (
-                <>
-                    <View style={styles.selectionContainer}>
-                        <TouchableOpacity onPress={handlePrevious}>
-                            <MaterialIcons name="arrow-left" size={96} color={ColorsPalette.PrimaryColorLight} />
-                        </TouchableOpacity>
-                        <Image source={propertiesList[index].avatar} style={styles.avatar} />
-                        <TouchableOpacity onPress={handleNext}>
-                            <MaterialIcons name="arrow-right" size={96} color={ColorsPalette.PrimaryColorLight} />
-                        </TouchableOpacity>
-                    </View>
-                    <Text style={[styles.attribute, styles.name]}>{propertiesList[index].name}</Text>
-                    <Text style={styles.attribute}>Favorite Food: {propertiesList[index].favoriteFood}</Text>
-                    <Text style={styles.attribute}>Age: {propertiesList[index].age}</Text>
-                </>
-            )}
+            <View style={styles.selectionContainer}>
+                <TouchableOpacity onPress={handlePrevious}>
+                    <MaterialIcons name="arrow-left" size={96} color={ColorsPalette.PrimaryColorLight} />
+                </TouchableOpacity>
+                <Image source={propertiesList[index].avatar} style={styles.avatar} />
+                <TouchableOpacity onPress={handleNext}>
+                    <MaterialIcons name="arrow-right" size={96} color={ColorsPalette.PrimaryColorLight} />
+                </TouchableOpacity>
+            </View>
+            <Text style={[styles.attribute, styles.name]}>{propertiesList[index].name}</Text>
+            <Text style={[styles.attribute, styles.regularFont]}>Favorite Food: {propertiesList[index].favoriteFood}</Text>
+            <Text style={[styles.attribute, styles.regularFont]}>Age: {propertiesList[index].age}</Text>
         </View>
     );
-
 }
+
 
 const styles = StyleSheet.create({
     componentWrapper: {
@@ -156,10 +157,14 @@ const styles = StyleSheet.create({
         borderWidth: 5,
     },
     attribute: {
-        padding: 5,
-
+        paddingBottom: 5
     },
     name: {
-        fontSize: 24,
+        fontFamily: 'NunitoSans_10pt-Bold',
+        fontSize: 36,
+    },
+    regularFont: {
+        fontFamily: 'NunitoSans_10pt-Regular',
+        fontSize: 18,
     }
 });

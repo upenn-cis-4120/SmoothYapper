@@ -10,7 +10,7 @@ export default function TabLayout() {
         throw new Error("useTabContext must be used within a TabProvider");
     }
     const { activeTab, setActiveTab } = tabContext;
-    const hideBarTabList = ["practice", "practiceResult", "transcripts", "improvement"];
+    const hideBarTabList = ["practice", "practiceResult", "transcripts", "improvement", "topicPage"];
     
     return (
         <Tabs screenOptions={({route}) =>({
@@ -45,7 +45,7 @@ export default function TabLayout() {
                 options={{
                     title: "Dashboard",
                     tabBarIcon: ({ color, focused }) => (
-                        <MaterialCommunityIcons name={ focused ? "book-multiple" : "book-multiple-outline"} size={64} color={color} />
+                        <MaterialIcons name={ focused ? "star" : "star-border"} size={64} color={color} />
                     ),
                 }} 
                 listeners= {{
@@ -58,7 +58,7 @@ export default function TabLayout() {
                 options={{
                     title: "Topic",
                     tabBarIcon: ({ color, focused }) => (
-                        <MaterialCommunityIcons name={ focused ? "chat-processing" : "chat-processing-outline" } size={64} color={color} />
+                        <MaterialCommunityIcons name={ focused || (activeTab === "topic")  ? "chat-processing" : "chat-processing-outline" } size={64} color={activeTab === "topic" ? ColorsPalette.SecondaryColorDeep : color} />
                     ),
                 }}
                 listeners= {{
@@ -119,6 +119,15 @@ export default function TabLayout() {
                 name="improvement"
                 options={{
                     title: "Improvement",
+                    tabBarIcon: () => null,
+                    tabBarButton: () => null,
+                }}
+            />
+
+            <Tabs.Screen
+                name="topicPage"
+                options={{
+                    title: "Topic Page",
                     tabBarIcon: () => null,
                     tabBarButton: () => null,
                 }}

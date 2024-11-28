@@ -3,7 +3,6 @@ import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 
 import Message from "@/components/Message";
-import { useTabContext } from "@/contexts/TabContext";
 import { useEffect } from "react";
 import Logger from "@/components/Logger";
 import baseURL from "@/constants/baseURL";
@@ -11,28 +10,7 @@ import baseURL from "@/constants/baseURL";
 const { ColorsPalette } = require("@/constants/colors.tsx");
 import { Message as MessageType, Sentences as SentenceType } from "@/types/Message";
 
-function parseMessagesToMessageArray(data: any): MessageType[] {
-    const messagesObject = data.messages;
-    const length = messagesObject.length;
 
-    const messagesArray: MessageType[] = [];
-
-    for (let i = 0; i < length; i++) {
-        const message = messagesObject[i];
-        if (!message) continue;
-
-        messagesArray.push({
-            id: i,
-            type: message.role === 'user' ? 'sent' : 'received',
-            text: message.content,
-            sentences: splitIntoSentences(message.content),
-            timestamp: new Date().toISOString(), // Add logic for the correct timestamp
-            avatar: message.role === 'user' ? 'user-avatar-url' : 'assistant-avatar-url', // Replace with actual URLs
-        });
-    }
-
-    return messagesArray;
-}
 
 function splitIntoSentences(content: string): SentenceType[] {
     // Regex to match sentence-ending symbols and retain them
@@ -61,12 +39,13 @@ function splitIntoSentences(content: string): SentenceType[] {
 
 
 export default function Transcripts() {
-    const { pageAParams } = useTabContext();
     console.log("Transcripts Page");
     const [transcribe, setTranscribe] = useState<MessageType[]>([]);
-    const { sessionId } = useLocalSearchParams();
+    const { sessionId, modelAvatarLink } = useLocalSearchParams();
+    const modelAvatar = modelAvatarLink as string;
     useEffect(() => {
         Logger.info("Transcript Page, loading session with id:", sessionId);
+        Logger.info("Model Avatar Link:", modelAvatar);
         const getTranscript = async () => {
             const response = await fetch(`${baseURL}/practice/${sessionId}`);
             const data = await response.json();
@@ -78,6 +57,29 @@ export default function Transcripts() {
 
         getTranscript();
     }, []);
+
+    function parseMessagesToMessageArray(data: any): MessageType[] {
+        const messagesObject = data.messages;
+        const length = messagesObject.length;
+    
+        const messagesArray: MessageType[] = [];
+    
+        for (let i = 0; i < length; i++) {
+            const message = messagesObject[i];
+            if (!message) continue;
+    
+            messagesArray.push({
+                id: i,
+                type: message.role === 'user' ? 'sent' : 'received',
+                text: message.content,
+                sentences: splitIntoSentences(message.content),
+                timestamp: new Date().toISOString(), // Add logic for the correct timestamp
+                avatar: message.role === 'user' ? 'user-avatar-url' : modelAvatar, // Replace with actual URLs
+            });
+        }
+    
+        return messagesArray;
+    }
 
     return (
         <SafeAreaView style={styles.container}>
@@ -94,7 +96,7 @@ export default function Transcripts() {
                         pathname: "/(tabs)/practiceSelection",
                     });
                 }}>
-                    <Text>Try Again</Text>
+                    <Text style={styles.buttonFonts}>Try Again</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.bottoms} onPress={() => {
                     console.log("Home button pressed");
@@ -104,7 +106,7 @@ export default function Transcripts() {
                         pathname: "/(tabs)",
                     });
                 }}>
-                    <Text>Home</Text>
+                    <Text style={styles.buttonFonts}>Home</Text>
                 </TouchableOpacity>
             </View>
         </SafeAreaView>
@@ -134,5 +136,10 @@ const styles = {
         borderRadius: 8,
         margin: 8,
         padding: 8,
-    }
+    },
+    buttonFonts: {
+        fontFamily: "NunitoSans_10pt-Black",
+        fontWeight: 900,
+        color: ColorsPalette.PrimaryColorLight,
+    },
 };

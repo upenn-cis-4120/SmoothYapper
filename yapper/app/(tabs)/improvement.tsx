@@ -70,6 +70,7 @@ const styles = StyleSheet.create({
     bottoms: {
         borderWidth: 1,
         borderColor: ColorsPalette.PrimaryColorLight,
+        fontFamily: "NunitoSans_10pt-Black",
         borderRadius: 8,
         margin: 8,
         padding: 8,

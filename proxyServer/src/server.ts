@@ -185,9 +185,6 @@ app.post('/speech', fileStorage.none(), async (req: Request, res: Response): Pro
     });
 
     const buffer = Buffer.from(await response.arrayBuffer());
-    if (test) {
-      await fsPromises.writeFile(speechFile, buffer);
-    }
     res.json({ audio: buffer.toString('base64') });
   } catch (error) {
     console.error('Error:', error);
