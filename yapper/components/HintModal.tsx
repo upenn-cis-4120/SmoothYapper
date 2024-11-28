@@ -51,6 +51,7 @@ const styles = StyleSheet.create({
         fontSize: 16,
         marginBottom: 10,
         textAlign: 'center',
+        fontFamily: 'NunitoSans_10pt-Regular',
     },
     closeButton: {
         marginTop: 20,

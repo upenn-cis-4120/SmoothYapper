@@ -1,44 +1,91 @@
 import { SafeAreaView, ScrollView, TouchableOpacity, View, Text } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
+import { useState } from "react";
 
 import Message from "@/components/Message";
-import { Message as MessageType } from "@/types/Message";
-import { useTabContext } from "@/contexts/TabContext";
 import { useEffect } from "react";
+import Logger from "@/components/Logger";
+import baseURL from "@/constants/baseURL";
 
 const { ColorsPalette } = require("@/constants/colors.tsx");
+import { Message as MessageType, Sentences as SentenceType } from "@/types/Message";
 
-export default function Transcripts() {
-    const { pageAParams } = useTabContext();
-    console.log("Transcripts Page");
-    // const { transcriptsData } = useLocalSearchParams();
-    useEffect(() => {
-        console.log("Transcripts Page");
-        if (pageAParams) {
-            console.log(`page params: ${pageAParams}`);
+
+
+function splitIntoSentences(content: string): SentenceType[] {
+    // Regex to match sentence-ending symbols and retain them
+    const sentenceEndingRegex = /([。？！\.\?!])/g;
+
+    // Split content into sentences while keeping the symbols
+    const sentencesWithSymbols = content.split(sentenceEndingRegex);
+
+    // Combine sentences and their ending symbols
+    const sentences: string[] = [];
+    for (let i = 0; i < sentencesWithSymbols.length; i += 2) {
+        const sentence = sentencesWithSymbols[i]?.trim();
+        const symbol = sentencesWithSymbols[i + 1] || "";
+        if (sentence) {
+            sentences.push(sentence + symbol); // Combine sentence with its symbol
         }
     }
-    , []);
-    // console.log(`Transcripts Data: ${transcriptsData}`);
-    // const parsedTranscripts = JSON.parse(decodeURIComponent(typeof transcriptsData === "string" ? transcriptsData : transcriptsData[0]));
-    const parsedTranscripts = pageAParams || [];
-    console.log(parsedTranscripts);
-    parsedTranscripts.forEach((message: MessageType) => {
-        const rawContent = message.text;
-        const sentenceRegex = /(?<=[.!?])\s+(?=[A-Z])|(?<=[.!?])\s*$/g;
-        const sentences: string[] = rawContent.split(sentenceRegex).filter(sentence => sentence.trim() !== '');
-        message.sentences = sentences.map((sentence, index) => {
-            return {
-                index: index,
-                content: sentence,
-                highlight: Math.random() < 0.2,
-            }
-        });
-    });
+
+    // Map to Sentences array
+    return sentences.map((sentence, index) => ({
+        index,
+        content: sentence.trim(),
+        highlight:( Math.random() > 0.7),
+    }));
+}
+
+
+export default function Transcripts() {
+    console.log("Transcripts Page");
+    const [transcribe, setTranscribe] = useState<MessageType[]>([]);
+    const { sessionId, modelAvatarLink } = useLocalSearchParams();
+    const modelAvatar = modelAvatarLink as string;
+    useEffect(() => {
+        Logger.info("Transcript Page, loading session with id:", sessionId);
+        Logger.info("Model Avatar Link:", modelAvatar);
+        const getTranscript = async () => {
+            const response = await fetch(`${baseURL}/practice/${sessionId}`);
+            const data = await response.json();
+            Logger.info("Transcript Data:", data);
+            
+            const messages = parseMessagesToMessageArray(data);
+            setTranscribe(messages);
+        };
+
+        getTranscript();
+    }, []);
+
+    function parseMessagesToMessageArray(data: any): MessageType[] {
+        const messagesObject = data.messages;
+        const length = messagesObject.length;
+    
+        const messagesArray: MessageType[] = [];
+    
+        for (let i = 0; i < length; i++) {
+            const message = messagesObject[i];
+            if (!message) continue;
+    
+            messagesArray.push({
+                id: i,
+                type: message.role === 'user' ? 'sent' : 'received',
+                text: message.content,
+                sentences: splitIntoSentences(message.content),
+                timestamp: new Date().toISOString(), // Add logic for the correct timestamp
+                avatar: message.role === 'user' ? 'user-avatar-url' : modelAvatar, // Replace with actual URLs
+            });
+        }
+    
+        return messagesArray;
+    }
+
     return (
         <SafeAreaView style={styles.container}>
+            <Text style={styles.title}>Transcript</Text>
             <ScrollView>
-                {parsedTranscripts.map((message: any) => (
+                {transcribe.map((message: MessageType) => (
                     <Message key={message.id} message={message} />
                 ))}
             </ScrollView>
@@ -49,15 +96,17 @@ export default function Transcripts() {
                         pathname: "/(tabs)/practiceSelection",
                     });
                 }}>
-                    <Text>Try Again</Text>
+                    <Text style={styles.buttonFonts}>Try Again</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.bottoms} onPress={() => {
                     console.log("Home button pressed");
+                    // Clean up the session
+                    setTranscribe([]);
                     router.replace({
                         pathname: "/(tabs)",
                     });
                 }}>
-                    <Text>Home</Text>
+                    <Text style={styles.buttonFonts}>Home</Text>
                 </TouchableOpacity>
             </View>
         </SafeAreaView>
@@ -65,6 +114,13 @@ export default function Transcripts() {
 };
 
 const styles = {
+    title:{
+        color: ColorsPalette.PrimaryColorLight,
+        fontSize: 24,
+        fontWeight: 'bold',
+        textAlign: 'center',
+        margin: 10,
+    },
     container: {
         flex: 1,
         backgroundColor: ColorsPalette.FullWhite,
@@ -80,5 +136,10 @@ const styles = {
         borderRadius: 8,
         margin: 8,
         padding: 8,
-    }
+    },
+    buttonFonts: {
+        fontFamily: "NunitoSans_10pt-Black",
+        fontWeight: 900,
+        color: ColorsPalette.PrimaryColorLight,
+    },
 };

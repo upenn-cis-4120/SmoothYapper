@@ -15,7 +15,6 @@ type Props = {
 export default function Message({ message }: Props) {
     const { type, text, avatar, sentences } = message;
 
-    const modelAvatar = require('@/assets/images/cropped-tom.jpg');
     const userAvatar = require('@/assets/images/user.png');
     
     return type === 'sent' ? (
@@ -49,7 +48,7 @@ export default function Message({ message }: Props) {
     ) : (
         <View style={styles.container}>
             <View style={styles.avatarContainer}>
-                <Image source={modelAvatar} style={styles.avatar} />
+                <Image source={avatar} style={styles.avatar} />
             </View>
             <View style={[styles.message, styles.received]}>
                 {sentences.map((sentence, index) => (
@@ -84,6 +83,7 @@ const styles = StyleSheet.create({
     },
     textSent: {
         color: ColorsPalette.FullWhite,
+        fontFamily: 'NunitoSans_10pt-Regular',
     },
     received: {
         backgroundColor: ColorsPalette.SecondaryColorLight,
@@ -92,6 +92,7 @@ const styles = StyleSheet.create({
     },
     textReceived: {
         color: "#000",
+        fontFamily: 'NunitoSans_10pt-Regular',
     },
     avatar: {
         width: 40,

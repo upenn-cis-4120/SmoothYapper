@@ -6,20 +6,19 @@ const { ColorsPalette } = require("@/constants/colors.tsx");
 import RatingDisplay from '@/components/StarRating';
 import { useTabContext } from '@/contexts/TabContext';
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useEffect } from "react";
+
+import baseURL from "@/constants/baseURL";
 
 export default function PracticeResult() {
 
-    const { modelData, practiceResultData, sampleMessageData } = useLocalSearchParams();
+    const { modelData, practiceResultData, sessionId } = useLocalSearchParams();
     console.log(`Model Data: ${modelData}`);
     console.log(`Practice Result Data: ${practiceResultData}`);
-    console.log(`Sample Message Data: ${sampleMessageData}`);
+    console.log(`Sample Message Data: ${sessionId}`);
     const parsedModel = JSON.parse(decodeURIComponent(typeof modelData === "string" ? modelData : modelData[0]));
     const parsedPracticeResult = JSON.parse(decodeURIComponent(typeof practiceResultData === "string" ? practiceResultData : practiceResultData[0]));
     console.log(parsedPracticeResult);
-    const messages = JSON.parse(decodeURIComponent(typeof sampleMessageData === "string" ? sampleMessageData : sampleMessageData[0]));
-    console.log(messages);
-
-    const { setPageAParams } = useTabContext();
 
     return (
         <SafeAreaView style={styles.feedbackContainer}>
@@ -42,11 +41,12 @@ export default function PracticeResult() {
             </View>
             <View style={styles.feedbackButtonContainer}>
                 <TouchableOpacity style={styles.feedbackButtons} onPress={ () => {
-                    setPageAParams(messages);
+                    console.log(`Parsed model: ${parsedModel}`);
                     router.replace({
                         pathname: "/(tabs)/transcripts",
                         params: {
-                            transcriptsData: encodeURIComponent(JSON.stringify(messages)),
+                            sessionId: sessionId,
+                            modelAvatarLink: parsedModel.avatar,
                         }
                     })
                 }}>

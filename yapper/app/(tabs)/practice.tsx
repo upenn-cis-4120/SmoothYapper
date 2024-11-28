@@ -7,26 +7,55 @@ import axios from 'axios';
 import FormData from 'form-data';
 import * as FileSystem from 'expo-file-system';
 
-import { Message as MessageType } from "@/types/Message";
-
 const { ColorsPalette } = require("@/constants/colors.tsx");
-import sampleMessages from '@/assets/sampleData/MessageSamples';
+import baseURL from "@/constants/baseURL";
 
 import HintModal from "@/components/HintModal";
 import Timer from "@/components/Timer";
 import Message from "@/components/Message";
 import AudioRecorder from "@/components/AudioRecorder";
 import AudioPlayer from "@/components/AudioPlayer";
+import logger from "@/components/Logger";
 
-const baseURL = "http://100.110.220.66:3000";
+import { Message as MessageType, Sentences as SentenceType } from "@/types/Message";
+
+function splitIntoSentences(content: string): SentenceType[] {
+    // Regex to match sentence-ending symbols and retain them
+    const sentenceEndingRegex = /([。？！\.\?!])/g;
+
+    // Split content into sentences while keeping the symbols
+    const sentencesWithSymbols = content.split(sentenceEndingRegex);
+
+    // Combine sentences and their ending symbols
+    const sentences: string[] = [];
+    for (let i = 0; i < sentencesWithSymbols.length; i += 2) {
+        const sentence = sentencesWithSymbols[i]?.trim();
+        const symbol = sentencesWithSymbols[i + 1] || "";
+        if (sentence) {
+            sentences.push(sentence + symbol); // Combine sentence with its symbol
+        }
+    }
+
+    // Map to Sentences array
+    return sentences.map((sentence, index) => ({
+        index,
+        content: sentence.trim(),
+        highlight:( Math.random() > 0.7),
+    }));
+}
 
 export default function Practice() {
-    const { modelData } = useLocalSearchParams();
-    const [ hintOpen, setHintOpen ] = useState(false);
+    const { modelData, scenario } = useLocalSearchParams();
+    const [ hintOpen, setHintOpen ] = useState(true);
     const [elapsedTime, setElapsedTime] = useState(0);
     const [timerActive, setTimerActive] = useState(true);
     const [isInitialMount, setIsInitialMount] = useState(true); 
     const parsedModel = JSON.parse(decodeURIComponent(typeof modelData === "string" ? modelData : modelData[0]));
+    const hintContents = [
+        "Current Scenario: " + scenario,
+        "Pick a random topic and talk about it. When you are ready, press the record button to start recording.",
+        "When you are done, press the record button again to stop recording.",
+    ]
     const [isRecording, setIsRecording] = useState(false);
     const [messages, setMessages] = useState<MessageType[]>([]);
     const [isSessionActive, setIsSessionActive] = useState(true);
@@ -38,6 +67,7 @@ export default function Practice() {
     const [playing, setPlaying] = useState(false);
     const [generating, setGenerating] = useState(false);
     const [transcribing, setTranscribing] = useState(false);
+    const [transcribeShown, setTranscribeShown] = useState(true);
 
     const generatingMessage : MessageType = {
         id: messages.length+1,
@@ -51,13 +81,13 @@ export default function Practice() {
             },
         ],
         timestamp: new Date().toISOString(),
-        avatar: "@/assets/images/cropped-tom.jpg",
+        avatar: parsedModel.avatar,
     };
 
     const recordingMessage : MessageType = {
         id: messages.length+1,
         type: "sent",
-        text: "Recording...",
+        text: "Transcribing...",
         sentences: [
             {
                 content: "Recording...",
@@ -66,7 +96,7 @@ export default function Practice() {
             },
         ],
         timestamp: new Date().toISOString(),
-        avatar: "@/assets/images/cropped-tom.jpg",
+        avatar: parsedModel.avatar,
     };
 
     useFocusEffect(() => {
@@ -80,10 +110,12 @@ export default function Practice() {
 
     useEffect(() => {
         const getSessionId = async () => {
+            logger.info("Initiating session...");
+            logger.info(`Scenario: ${scenario}`);
             const response = await axios.post(`${baseURL}/initChat`, {
-                scenario : "Academic",
+                scenario : scenario,
             });
-            console.log(`SessionId: ${response.data.sessionId}`);
+            logger.info(`Session inited, sessionId: ${response.data.sessionId}`);
             sessionIdRef.current = response.data.sessionId;
         };
 
@@ -111,7 +143,7 @@ export default function Practice() {
                 });
 
                 const transcription = await response.json();
-                console.log(`Transcription: ${transcription.text}`);
+                logger.info(`Transcription: ${transcription.text}`);
                 
                 const message: MessageType = {
                     id: messages.length+1,
@@ -125,9 +157,9 @@ export default function Practice() {
                         index,
                     })),
                     timestamp: new Date().toISOString(),
-                    avatar: "@/assets/images/cropped-tom.jpg",
+                    avatar: parsedModel.avatar,
                 };
-                console.log(`Message: ${message.text}`);
+                logger.info(`Parsed Message: ${message}`);
                 setTranscribing(false);
                 setMessages((prevMessages) => [...prevMessages, message]);
                 setLatestUserMessage(transcription.text);
@@ -157,11 +189,12 @@ export default function Practice() {
                     body: formData as any,
                 });
                 if(!textResponse.ok) {
-                    console.error(`GPT Response Error: ${textResponse.text}`);
+                    const responseJson = await textResponse.json();
+                    logger.error(`Error ${responseJson.error.code}: ${responseJson.error.message}`);
                     return;
                 }
                 const textResponseJson = await textResponse.json();
-                console.log(`GPT Response: ${textResponseJson.message}`);
+                logger.info(`Text Response: ${textResponseJson.message}`);
                 
                 const ttsResponse = await fetch(`${baseURL}/speech`, {
                     method: 'POST',
@@ -184,22 +217,18 @@ export default function Practice() {
                 });
                 console.log("Setting TTS Audio URI: ", fileUri);
                 setTtsAudioUri(fileUri);
-
+                // FIXME: The audio player is not playing the audio when reentering the practice after a seccion ends
+                // FIXME: The period symbols are missing at the end of each sentence
+                const sentences = textResponseJson.message.match(/[^.!?]+[.!?]+/g) || [];
                 setMessages((prevMessages) => [
                     ...prevMessages,
                     {
-                        id: prevMessages.length+1,
+                        id: prevMessages.length + 1,
                         type: "received",
                         text: textResponseJson.message,
-                        sentences: textResponseJson.message
-                            .split('. ') // Example splitting by sentences
-                            .map((content: string, index: number) => ({
-                            content,
-                            highlight: false, // or some logic to determine highlighting
-                            index,
-                        })),
+                        sentences: splitIntoSentences(textResponseJson.message),
                         timestamp: new Date().toISOString(),
-                        avatar: "@/assets/images/cropped-tom.jpg",
+                        avatar: parsedModel.avatar,
                     },
                 ]);
                 setGenerating(false);
@@ -324,6 +353,10 @@ export default function Practice() {
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.outlinedButton} onPress={() => {
                         // TODO: Init an end session request
+                        // however, the sessionId should not be deleted from Redis
+                        // The sessionId should be deleted when the user ends the whole practice 
+                        // aftering viewing the results and feedback
+                        // FIXME: Check the resources cleanning and the session cleanning, which leads to existing bugs in no sounds and bad session state
                         console.log("End button pressed");
                         setElapsedTime(0);
                         setTimerActive(false);
@@ -340,7 +373,7 @@ export default function Practice() {
                                     language: 3,
                                     topic: 2,
                                 })),
-                                sampleMessageData: encodeURIComponent(JSON.stringify(sampleMessages)),
+                                sessionId: sessionIdRef.current,
                             },
                         });
                     }}>
@@ -361,32 +394,43 @@ export default function Practice() {
                 elapsedTime={elapsedTime}
                 setElapsedTime={setElapsedTime}
                 />
-                <TouchableOpacity onPress={() => {
-                    setTimerActive(!timerActive);
-                    if(timerActive) {
-                        console.log("Pause button pressed");   
-                        showPauseToast();                     
-                    } else {
-                        console.log("Resume button pressed");
-                        showResumeToast();
-                    }
-                }}>
-                    {timerActive ? <MaterialIcons name="pause-circle-outline" size={40} color={ColorsPalette.PrimaryColorLight} /> : <MaterialIcons name="play-circle-outline" size={40} color={ColorsPalette.PrimaryColorLight} />}
-                </TouchableOpacity>
             </View>
-            <ScrollView style={styles.messageWrapper}>
-                {messages.map((message, index) => (
-                    <Message key={index} message={message} />
-                ))}
-                {(isRecording || transcribing) && (
-                    <Message key={2} message={recordingMessage} />
-                )}
-                {(generating) && (
-                    <Message key={1} message={generatingMessage} />
-                )}
-            </ScrollView>
+            <View style={styles.modelWrapper}>
+                <Image source={parsedModel.avatar} style={styles.avatar} />
+            </View>
+            {
+                transcribeShown ? (
+                    <ScrollView style={styles.messageWrapper}>
+                        {messages.map((message, index) => (
+                            <Message key={index} message={message} />
+                        ))}
+                        {(isRecording || transcribing) && (
+                            <Message key={2} message={recordingMessage} />
+                        )}
+                        {(generating) && (
+                            <Message key={1} message={generatingMessage} />
+                        )}
+                    </ScrollView>
+                ) : (
+                    <View style={styles.messageWrapper}>
+                        <Text style={styles.title}>Transcription Hidden</Text>
+                    </View>
+                )
+            }
             <View style={styles.bottomBar}>
-                <View style={{flex: 1}}></View>
+                <View style={{flex: 1}}>
+                    <TouchableOpacity onPress={
+                        () => {
+                            setTranscribeShown(!transcribeShown);
+                        }
+                    }>
+                        {transcribeShown ? (
+                            <MaterialIcons name="closed-caption" size={40} color={ColorsPalette.PrimaryColorLight} />
+                        ) : (
+                            <MaterialIcons name="closed-caption-disabled" size={40} color={ColorsPalette.PrimaryColorLight} />
+                        )}
+                    </TouchableOpacity>
+                </View>
                 <View style={styles.recordingWrapper}>
                     <TouchableOpacity onPress={toggleRecording} style={styles.recordingButton}>
                         {
@@ -410,7 +454,7 @@ export default function Practice() {
                     </TouchableOpacity>
                 </View>
             </View>
-            <HintModal isVisible= {hintOpen} hintContents={["Hint 1: You only live once", "Hint 2: Never choose math courses"]} onClose={() => {
+            <HintModal isVisible= {hintOpen} hintContents={hintContents} onClose={() => {
                 console.log("Hint modal closed");
                 setHintOpen(false);
                 setTimerActive(true);
@@ -441,8 +485,8 @@ const styles = StyleSheet.create({
         padding: 8,
     },
     buttonFonts: {
-        fontFamily: "NunitoSans-Variable",
-        fontWeight: 800,
+        fontFamily: "NunitoSans_10pt-Black",
+        fontWeight: 900,
         color: ColorsPalette.PrimaryColorLight,
     },
     leftBarWrapper:{
@@ -455,7 +499,7 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
         width: "90%",
-        height: "75%",
+        height: "30%",
         borderWidth: 1,
         borderColor: ColorsPalette.PrimaryColorLight,
         borderRadius: 8,
@@ -487,4 +531,19 @@ const styles = StyleSheet.create({
         backgroundColor: ColorsPalette.FullWhite,
         borderRadius: 8,
     },
+    avatar: {
+        width: 212,
+        height: 212,
+        borderRadius: 106,
+        borderColor: ColorsPalette.FullWhite,
+        borderWidth: 5,
+    },
+    title: {
+        fontSize: 24,
+        fontWeight: "bold",
+        color: ColorsPalette.PrimaryColorLight,
+        textAlign: "center",
+        marginBottom: 20,
+        marginTop: 20,
+    }
 });

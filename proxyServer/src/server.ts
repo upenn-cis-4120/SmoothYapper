@@ -10,6 +10,9 @@ import bodyParser from 'body-parser';
 import { createClient } from 'redis';
 import { v4 as uuidV4 } from 'uuid';
 
+
+import { chatbotScenarios, Scenario, ExamplePrompt } from "./modelParameters";
+
 configDotenv();
 const app = express();
 const port: string | number = process.env.PORT || 3000;
@@ -40,9 +43,8 @@ app.post('/transcribe', fileStorage.single('audio'), async (req: Request, res: R
     res.status(400).send('No file uploaded or no audio data found.');
     return;
   }
-
+  const tempFilePath = pathJoin(tmpdir(), `upload-${Date.now()}.m4a`);
   try {
-    const tempFilePath = pathJoin(tmpdir(), `upload-${Date.now()}.m4a`);
     await fsPromises.writeFile(tempFilePath, file.buffer);
     const response = await openai.audio.transcriptions.create({
       file: fs.createReadStream(tempFilePath),
@@ -54,6 +56,13 @@ app.post('/transcribe', fileStorage.single('audio'), async (req: Request, res: R
   } catch (error) {
     console.error('Error:', error);
     res.status(500).send('Error processing transcription.');
+  } finally {
+    // Delete the temporary file after processing.
+    fs.unlink(tempFilePath, (err) => {
+      if (err) {
+        console.error('Error deleting temporary file:', err);
+      }
+    });
   }
 });
 
@@ -65,7 +74,7 @@ interface ConversationEntry {
 type ConversationHistory = ConversationEntry[];
 
 app.post('/endChat', fileStorage.none(), async (req: Request, res: Response) => {
-  const sessionId = req.body.sessionId;
+  const sessionId = req.body.sessionId as string;
   if (!sessionId) {
     res.status(400).send('Missing sessionId.');
     return;
@@ -77,20 +86,29 @@ app.post('/endChat', fileStorage.none(), async (req: Request, res: Response) => 
     return;
   }
 
-  await redisClient.del(sessionId);
-  res.json({ message: 'Session ended.' });
+  const sessionDataJson = JSON.parse(sessionData);
+  const conversationWithoutSystemMessages = sessionDataJson.filter((entry: ConversationEntry) => entry.role !== 'system');
+
+  res.json({ conversation: conversationWithoutSystemMessages });
 });
 
 app.post('/initChat', fileStorage.none() ,async (req: Request, res: Response) => {
-  const scnario = req.body.scenario;
-  if (!scnario) {
+  const scenario = req.body.scenario;
+  if (!scenario) {
     res.status(400).send('Missing scenario.');
     return;
   } else {
-    console.log("Scenario: ", scnario);
+    console.log("Scenario: ", scenario);
   }
   const sessionId = uuidV4();
-  const conversationHistory: ConversationHistory = [{ content: scnario, role: 'system' }];
+
+  const scenarioData = chatbotScenarios[scenario];
+  if(!scenarioData) {
+    res.status(400).send('Invalid scenario.');
+    return;
+  }
+  
+  const conversationHistory: ConversationHistory = [{ content: scenarioData.defaultPrompt, role: 'system' }];
   redisClient.set(sessionId, JSON.stringify(conversationHistory));
   res.json({ sessionId });
 });
@@ -167,14 +185,33 @@ app.post('/speech', fileStorage.none(), async (req: Request, res: Response): Pro
     });
 
     const buffer = Buffer.from(await response.arrayBuffer());
-    if (!test) {
-      await fsPromises.writeFile(speechFile, buffer);
-    }
     res.json({ audio: buffer.toString('base64') });
   } catch (error) {
     console.error('Error:', error);
     res.status(500).send('Error processing speech.');
   }
+});
+
+// TODO: Add a route to genmerate the practice evaluation result and the improvements on the conversation sentences.
+
+app.get('/practice/:id', async (req: Request, res: Response) => {
+  const sessionId = req.params.id;
+  if (!sessionId) {
+    res.status(400).send('Missing sessionId.');
+    return;
+  }
+
+  console.log("Session ID: ", sessionId);
+
+  const sessionData = await redisClient.get(sessionId);
+  if (!sessionData) {
+    res.status(400).send('Session not found.');
+    return;
+  }
+
+  const conversationHistory: ConversationHistory = JSON.parse(sessionData) || [];
+  const messagesWithoutSystem = conversationHistory.filter((entry: ConversationEntry) => entry.role !== 'system');
+  res.json({ messages: messagesWithoutSystem });
 });
 
 app.listen(3000, '0.0.0.0', () => {
