@@ -9,19 +9,18 @@ export default function Improvement() {
         <SafeAreaView style={styles.container}>
             <Text style={styles.title}>Improvement</Text>
             <Text style={styles.secondLevelTitle}>Expression to be Improved:</Text>
-            <Text style={styles.sentencesToBeImproved}>{sentence}</Text>
+            {/* <Text style={styles.sentencesToBeImproved}>{sentence}</Text> */}
+            <Text style={styles.sentencesToBeImproved}>{"Sick. I'm going to Europe for winter break. I hope to eat a lot of European food."}</Text>
             <Text style={styles.SuggestionHeader}>Suggestions from AI:</Text>
             <ScrollView style={styles.SuggestionContainer}>
-                <Text style={styles.suggestionTitle}>1. Use more complex sentences</Text>
-                <Text style={styles.suggestionContent}>Duis congue, eros a hendrerit dapibus, neque leo sollicitudin enim, in bibendum odio velit quis urna. Morbi porta dictum dui, ac iaculis urna eleifend id.</Text>
-                <Text style={styles.suggestionTitle}>2. Use more descriptive words</Text>
-                <Text style={styles.suggestionContent}>Tiam sit amet justo eget tortor faucibus ornare ac vel velit. Morbi lobortis, felis sed placerat porttitor, purus tellus mollis dui, eget vestibulum lacus quam non orci. Nunc fringilla massa ac ligula posuere rhoncus.</Text>
-                <Text style={styles.suggestionTitle}>3. Use more idiomatic expressions</Text>
-                <Text style={styles.suggestionContent}>Aliquam eget eros enim. Aenean quis venenatis nibh, non ultricies nisi. Nunc porttitor ipsum lacus, at cursus ante suscipit ac. Phasellus leo odio, rutrum et bibendum tincidunt, accumsan sit amet tellus. Mauris at blandit nunc, finibus feugiat nunc.</Text>
-                <Text style={styles.suggestionTitle}>4. Use more formal language</Text>
-                <Text style={styles.suggestionContent}>Maecenas ultricies, odio nec congue lacinia, tortor libero fermentum quam, nec ultricies metus dolor vel nisi. Nullam nec nunc vel nunc ultricies lacinia.</Text>
-                <Text style={styles.suggestionTitle}>5. Use more informal language</Text>
-                <Text style={styles.suggestionContent}>Duis congue, eros a hendrerit dapibus, neque leo sollicitudin enim, in bibendum odio velit quis urna. Morbi porta dictum dui, ac iaculis urna eleifend id. Aliquam eget eros enim. Aenean quis venenatis nibh, non ultricies nisi. Nunc porttitor ipsum lacus, at cursus ante suscipit ac. Phasellus leo odio, rutrum et bibendum tincidunt, accumsan sit amet tellus. Mauris at blandit nunc, finibus feugiat nunc.</Text>
+                <Text style={styles.suggestionTitle}>1. Add excitement:</Text>
+                <Text style={styles.suggestionContent}>Adding enthusiasm with phrases like “That’s awesome!” and “Can’t wait” conveys genuine excitement, which helps build rapport in small talk. This makes the sentence feel more engaging and inviting for further conversation.</Text>
+                <Text style={styles.suggestionTitle}>2. Make it more conversational</Text>
+                <Text style={styles.suggestionContent}>Phrases like “Cool, right?” and “I’m really looking forward to…” make the tone sound more conversational and friendly, which encourages a natural flow in small talk. Using “local dishes” instead of “European food” shows curiosity and specificity.</Text>
+                <Text style={styles.suggestionTitle}>3. Specify or personalize</Text>
+                <Text style={styles.suggestionContent}>Adding specific foods and places (e.g., “pasta in Italy” or “croissants in France”) makes the sentence more vivid and personal. This invites the listener to ask follow-up questions like, “Are you visiting Italy and France?” or “Do you have a favorite dish in mind?”</Text>
+                <Text style={styles.suggestionTitle}>4. Reduce redundancy</Text>
+                <Text style={styles.suggestionContent}>The original sentence repeats “Europe” and “European food,” which can feel redundant. This version is more concise while keeping the casual tone. The phrase “dive into the food scene” adds personality and expresses excitement in a fresh way.</Text>
             </ScrollView>
             <View style={styles.bottomBar}>
                 <TouchableOpacity style={styles.bottoms} onPress={() => {
@@ -30,7 +29,7 @@ export default function Improvement() {
                         pathname: "/(tabs)/practiceSelection",
                     });
                 }}>
-                    <Text>Try Again</Text>
+                    <Text style={styles.buttonFonts}>Try Again</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.bottoms} onPress={() => {
                     console.log("Home button pressed");
@@ -38,7 +37,7 @@ export default function Improvement() {
                         pathname: "/(tabs)",
                     });
                 }}>
-                    <Text>Home</Text>
+                    <Text  style={styles.buttonFonts}>Home</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.bottoms} onPress={() => {
                     console.log("Return to Transcripts button pressed");
@@ -46,7 +45,7 @@ export default function Improvement() {
                         pathname: "/(tabs)/transcripts",
                     });                     
                 }}>
-                    <Text>Return</Text>
+                    <Text  style={styles.buttonFonts}>Return</Text>
                 </TouchableOpacity>
             </View>
         </SafeAreaView>
@@ -71,14 +70,16 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: ColorsPalette.PrimaryColorLight,
         fontFamily: "NunitoSans_10pt-Black",
+        fontWeight: 800,
         borderRadius: 8,
         margin: 8,
         padding: 8,
     },
     title: {
-        fontSize: 20,
+        fontSize: 24,
         fontWeight: "bold",
         color: ColorsPalette.PrimaryColorLight,
+        fontFamily: "NunitoSans_10pt-Black",
         padding: 10,
     },
     secondLevelTitle: {
@@ -88,8 +89,8 @@ const styles = StyleSheet.create({
     }, 
     SuggestionContainer: {
         backgroundColor: ColorsPalette.NeutralColorLight,
-        padding: 10,
-        margin: 10,
+        padding: 16,
+        margin: 16,
         borderRadius: 8,
         width: "90%",
     },
@@ -101,18 +102,25 @@ const styles = StyleSheet.create({
     sentencesToBeImproved: {
         fontSize: 16,
         color: ColorsPalette.SecondaryColorDeep,
+        fontFamily: "NunitoSans_10pt-Bold",
         padding: 10,
         width: "90%",
     },
     suggestionTitle: {
-        fontSize: 16,
+        fontSize: 18,
         fontWeight: "bold",
         color: ColorsPalette.PrimaryColorLight,
+        paddingBottom: 5,
     },
     suggestionContent: {
         fontSize: 16,
         color: ColorsPalette.NeutralColorDeep,
         paddingVertical: 10,
-    }
+    },
+    buttonFonts: {
+        fontFamily: "NunitoSans_10pt-Black",
+        fontWeight: 900,
+        color: ColorsPalette.PrimaryColorLight,
+    },
 
 });
