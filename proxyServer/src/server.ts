@@ -172,8 +172,6 @@ app.post('/speech', fileStorage.none(), async (req: Request, res: Response): Pro
   const responseFormat = req.body.format || 'mp3';
   const speed = req.body.speed || 1.0;
   const model = req.body.model || 'tts-1';
-  const test = req.body.test || false;
-  const speechFile = path.resolve(`${new Date().toISOString()}_test_speech.mp3`);
 
   try {
     const response = await openai.audio.speech.create({
@@ -193,6 +191,45 @@ app.post('/speech', fileStorage.none(), async (req: Request, res: Response): Pro
 });
 
 // TODO: Add a route to genmerate the practice evaluation result and the improvements on the conversation sentences.
+
+app.post('/improve', fileStorage.none(), async (req: Request, res: Response) => {
+  const sessionId = req.body.sessionId;
+  const sentence = req.body.sentence;
+
+  if (!sessionId || !sentence) {
+    res.status(400).send('Missing sessionId or sentence.');
+    return;
+  }
+
+  const sessionData = await redisClient.get(sessionId);
+  if (!sessionData) {
+    res.status(400).send('Session not found.');
+    return;
+  }
+
+  const conversationHistory: ConversationHistory = JSON.parse(sessionData) || [];
+
+  const prompt = "Improve the following sentence from the previous conversation: " + sentence + ". Provide a more engaging and supportive response for the purpose of daily social conversa\
+  tion. The goal is to make the sentence like a native speaker would say it. You should return the improvement as a stringfied JSON object like [{improvement: '', reason: ''}].";
+  
+  conversationHistory.push({ content: sentence, role: 'user' });
+
+  try {
+    const response = await openai.chat.completions.create({
+      messages: conversationHistory.map(entry => ({
+        role: entry.role,
+        content: entry.content,
+      })),
+      model: 'gpt-4o',
+    });
+
+    const aiMessage = response.choices[0].message.content || 'No response from chatGPT.';
+    res.json({ message: aiMessage });
+  } catch (error) {
+    console.error('Error:', error);
+    res.status(500).send('Error processing chat.');
+  }
+});
 
 app.get('/practice/:id', async (req: Request, res: Response) => {
   const sessionId = req.params.id;
