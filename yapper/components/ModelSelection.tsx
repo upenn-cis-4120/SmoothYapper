@@ -23,7 +23,7 @@ const monkResponse = {
         [
             {
                 id: 1,
-                name: "Ray Liu",
+                name: "Lewis",
                 favoriteFood: "Sushi",
                 age: 21,
                 avatar: require('@/assets/images/memoji-1.png'),

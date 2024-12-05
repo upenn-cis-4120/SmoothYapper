@@ -7,10 +7,11 @@ import { ColorsPalette } from "@/constants/colors";
 
 export default function Profile() {
 
-    const [accountName, setAccountName] = useState("John Doe");
+  const [accountName, setAccountName] = useState("John Doe");
   const [email, setEmail] = useState("john.doe@example.com");
   const ACCOUNT_NAME_KEY = "ACCOUNT_NAME";
   const EMAIL_KEY = "EMAIL";
+  const avatarImage = require("@/assets/images/user.png");
 
   useEffect(() => {
     const loadData = async () => {
@@ -48,16 +49,12 @@ export default function Profile() {
       <Text style={styles.header}>Profile</Text>
 
       {/* Avatar */}
+      <View style={styles.profileContainer}>
       <View style={styles.avatarContainer}>
-        <Image
-          style={styles.avatar}
-          source={{
-            uri: "https://via.placeholder.com/150.png?text=Avatar", // Replace with actual avatar URL
-          }}
-        />
-        <TouchableOpacity style={styles.editAvatarButton}>
+        <Image source={avatarImage} style={styles.avatar} />
+        {/* <TouchableOpacity style={styles.editAvatarButton}>
           <Text style={styles.editAvatarText}>Edit Avatar</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
 
       {/* Account Information */}
@@ -84,6 +81,7 @@ export default function Profile() {
           />
         </View>
       </View>
+      </View>
 
       {/* Save Button */}
       <View style={styles.botomButtons}>
@@ -103,80 +101,90 @@ export default function Profile() {
 };
 
 const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: "#FFFFFF",
+  container: {
+      flex: 1, // Use full height of the screen
+      backgroundColor: ColorsPalette.FullWhite,
       padding: 20,
-    },
-    header: {
-        marginTop: 20,
-        fontSize: 32,
-        fontWeight: "bold",
-        color: ColorsPalette.PrimaryColorLight,
-        marginBottom: 20,
-        marginLeft: "10%",
-    },
-    avatarContainer: {
+  },
+  header: {
+      marginTop: 20,
+      fontSize: 32,
+      fontWeight: "bold",
+      color: ColorsPalette.PrimaryColorLight,
+      marginLeft: "10%",
+      marginBottom: 20,
+      fontFamily: "NunitoSans_10pt-Black",
+  },
+  avatarContainer: {
       alignItems: "center",
-      marginBottom: 30,
-    },
-    avatar: {
+      marginBottom: 20, // Reduce margin for tighter spacing
+  },
+  avatar: {
       width: 120,
       height: 120,
       borderRadius: 60,
       borderWidth: 2,
       borderColor: "#EDEDED",
-    },
-    editAvatarButton: {
+  },
+  profileContainer: {
+      flexDirection: "column",
+      flexGrow: 1,
+      alignItems: "center",
+      marginTop: 10, // Push the profile container higher on the screen
+  },
+  editAvatarButton: {
       marginTop: 10,
       paddingVertical: 8,
       paddingHorizontal: 15,
       backgroundColor: "#F5A623",
       borderRadius: 20,
-    },
-    editAvatarText: {
+  },
+  editAvatarText: {
       color: "#FFFFFF",
       fontWeight: "bold",
-    },
-    infoContainer: {
-      marginBottom: 30,
+  },
+  infoContainer: {
+      marginBottom: 20, // Adjust for tighter spacing
       width: "90%",
       alignSelf: "center",
-    },
-    infoItem: {
+  },
+  infoItem: {
       marginBottom: 20,
-    },
-    label: {
+  },
+  label: {
       fontSize: 16,
       fontWeight: "bold",
-      color: "#002F5D",
+      color: ColorsPalette.PrimaryColorLight,
       marginBottom: 5,
-    },
-    input: {
+      fontFamily: "NunitoSans_10pt-Black",
+  },
+  input: {
       padding: 10,
       fontSize: 16,
       borderColor: "#EDEDED",
       borderWidth: 1,
       borderRadius: 8,
-      backgroundColor: "#F9F9F9",
-    },
-    saveButton: {
+      backgroundColor: ColorsPalette.NeutralColorLight,
+  },
+  saveButton: {
       paddingVertical: 15,
-      backgroundColor: "#002F5D",
       borderRadius: 8,
+      borderColor: ColorsPalette.PrimaryColorDeep,
+      borderWidth: 1,
       alignItems: "center",
       width: "40%",
-    alignSelf: "center",
-    },
-    saveButtonText: {
-      color: "#FFFFFF",
+  },
+  saveButtonText: {
+      color: ColorsPalette.PrimaryColorDeep,
       fontWeight: "bold",
       fontSize: 16,
-    },
-    botomButtons: {
+      fontFamily: "NunitoSans_10pt-Blac",
+  },
+  botomButtons: {
       flexDirection: "row",
       justifyContent: "space-between",
       width: "80%",
-        alignSelf: "center",
-    },
-  });
+      alignSelf: "center",
+      marginBottom: 20, // Ensure buttons have margin from the bottom
+  },
+});

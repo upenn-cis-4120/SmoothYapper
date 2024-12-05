@@ -99,30 +99,29 @@ export default function Practice() {
         avatar: parsedModel.avatar,
     };
 
+    const getSessionId = async () => {
+        logger.info("Initiating session...");
+        logger.info(`Scenario: ${scenario}`);
+        const response = await axios.post(`${baseURL}/initChat`, {
+            scenario : scenario,
+        });
+        logger.info(`Session inited, sessionId: ${response.data.sessionId}`);
+        sessionIdRef.current = response.data.sessionId;
+    };
+
     useFocusEffect(() => {
+        const initSession = async () => {
+            await getSessionId();
+            setIsSessionActive(true);
+        }
         if(isInitialMount) {
             setElapsedTime(0);
             setTimerActive(false);
             setIsInitialMount(false);
+            initSession();
         }
         return () => {};
     });
-
-    useEffect(() => {
-        const getSessionId = async () => {
-            logger.info("Initiating session...");
-            logger.info(`Scenario: ${scenario}`);
-            const response = await axios.post(`${baseURL}/initChat`, {
-                scenario : scenario,
-            });
-            logger.info(`Session inited, sessionId: ${response.data.sessionId}`);
-            sessionIdRef.current = response.data.sessionId;
-        };
-
-        if(isSessionActive && isInitialMount && sessionIdRef.current === "") {
-            getSessionId();
-        }
-    },[]);
 
     useEffect(() => {
         const postAudioForTranscription = async () => {
@@ -293,37 +292,6 @@ export default function Practice() {
         }
     };
 
-    const showPauseToast = () => {
-        Toast.show({
-            type: 'info',
-            text1: 'Timer Paused',
-            position: 'top',
-            autoHide: true,
-            topOffset: 80,
-            text1Style: {
-                fontFamily: "NunitoSans-Variable",
-                fontWeight: "800",
-                color: ColorsPalette.PrimaryColorLight,
-            },
-            visibilityTime: 1000, // Display for 1 second
-        });
-    };
-    const showResumeToast = () => {
-        Toast.show({
-            type: 'info',
-            text1: 'Timer Resumed',
-            position: 'top',
-            autoHide: true,
-            topOffset: 80,
-            text1Style: {
-                fontFamily: "NunitoSans-Variable",
-                fontWeight: "800",
-                color: ColorsPalette.PrimaryColorLight,
-            },
-            visibilityTime: 1000, // Display for 1 second
-        });
-    };
-
     return (
         <SafeAreaView style={styles.componentWrapper}>
             <AudioRecorder
@@ -362,6 +330,11 @@ export default function Practice() {
                         setTimerActive(false);
                         setIsInitialMount(true);
                         setIsSessionActive(false);
+                        setIsRecording(false);
+                        setRecordAble(true);
+                        setRecordingUri("");
+                        setTtsAudioUri("");
+                        setPlaying(false);
                         setMessages([]);
                         router.replace({
                             pathname: "/(tabs)/practiceResult",
@@ -376,6 +349,7 @@ export default function Practice() {
                                 sessionId: sessionIdRef.current,
                             },
                         });
+                        sessionIdRef.current = "";
                     }}>
                         <Text style={styles.buttonFonts}>End</Text>
                     </TouchableOpacity>

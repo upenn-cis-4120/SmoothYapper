@@ -74,7 +74,8 @@ const styles = StyleSheet.create({
         color: "#001F54",
         textAlign: "center",
         marginBottom: 20,
-        marginTop: 10
+        marginTop: 10,
+        fontFamily: "NunitoSans_10pt-Black",
     },
     logoWrapper: {
         flexDirection: "row",
@@ -100,11 +101,13 @@ const styles = StyleSheet.create({
         fontWeight: "600",
         color: "#001F54",
         marginBottom: 10,
+        fontFamily: "NunitoSans_10pt-Black",
     },
     value: {
         fontSize: 18,
         fontWeight: "bold",
         color: "#FFA500",
+        fontFamily: "NunitoSans_10pt-Black",
     },
     scoreContainer: {
         flexDirection: "row",
@@ -116,6 +119,7 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: "600",
         color: "#001F54",
+        fontFamily: "NunitoSans_10pt-Regular",
     },
     progressBarContainer: {
         flex: 2,

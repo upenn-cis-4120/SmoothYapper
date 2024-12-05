@@ -62,6 +62,7 @@ const styles = StyleSheet.create({
         color: ColorsPalette.PrimaryColorLight,
         marginBottom: 20,
         marginLeft: "10%",
+        fontFamily: "NunitoSans_10pt-Black",
     },
     textInput: {
         flex: 1,
@@ -71,7 +72,7 @@ const styles = StyleSheet.create({
         backgroundColor: ColorsPalette.NeutralColorLight,
         padding: 15,
         fontSize: 16,
-        color: "#002F5D",
+        color: ColorsPalette.PrimaryColorLight,
         textAlignVertical: "top", // Ensures the text starts at the top
         marginBottom: 20,
         width: "90%",
@@ -85,22 +86,26 @@ const styles = StyleSheet.create({
         marginBottom: 20,
     },
     submitButton: {
-        backgroundColor: ColorsPalette.PrimaryColorLight,
+        backgroundColor: ColorsPalette.FullWhite,
         paddingVertical: 15,
         borderRadius: 8,
         width: "40%",
         alignItems: "center",
+        borderColor: ColorsPalette.PrimaryColorDeep,
+        borderWidth: 1,
     },
     backButton: {
-        backgroundColor: "#002F5D",
+        borderColor: ColorsPalette.PrimaryColorDeep,
+        borderWidth: 1,
         paddingVertical: 15,
         borderRadius: 8,
         width: "40%",
         alignItems: "center",
     },
     buttonText: {
-        color: "#FFFFFF",
+        color: ColorsPalette.PrimaryColorDeep,
         fontWeight: "bold",
         fontSize: 16,
+        fontFamily: "NunitoSans_10pt-Black",
     },
 });

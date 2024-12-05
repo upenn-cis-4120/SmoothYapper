@@ -38,13 +38,6 @@ export default function TopicPage() {
         }
     };
 
-    const phrases = [
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit",
-        "sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-        "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
-        "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
-    ];
-
     return (
         <SafeAreaView style={styles.container}>
         <View style={styles.container}>
@@ -58,7 +51,7 @@ export default function TopicPage() {
             </TouchableOpacity>
 
             {/* Heading */}
-            <Text style={styles.heading}>Trending #1</Text>
+            <Text style={styles.heading}>{topicItem.title}</Text>
 
             {/* Image Section */}
             <View style={styles.imageContainer}>
@@ -87,10 +80,10 @@ export default function TopicPage() {
                 renderItem={({ item, index }) => (
                     <View style={styles.phrasesContainer}>
                         <Text style={styles.phrase}>{`${index+1}. ${item.phrase}`}</Text>
-                        <Text style={{ fontWeight: "bold", color: ColorsPalette.SecondaryColorDeep }}>{`Reason:`}</Text>
-                        <Text>{item.reason}</Text>
-                        <Text style={{ fontWeight: "bold", color: ColorsPalette.SecondaryColorDeep }}>{`Sample:`}</Text>
-                        <Text>{item.sampleSentence}</Text>
+                        <Text style={{ fontWeight: "bold", color: ColorsPalette.SecondaryColorDeep, fontFamily: "NunitoSans_10pt-Black" }}>{`Reason:`}</Text>
+                        <Text style={{fontFamily: "NunitoSans_10pt-Regular"}}>{item.reason}</Text>
+                        <Text style={{ fontWeight: "bold", color: ColorsPalette.SecondaryColorDeep, fontFamily: "NunitoSans_10pt-Black" }}>{`Sample:`}</Text>
+                        <Text style={{fontFamily: "NunitoSans_10pt-Regular"}}>{item.sampleSentence}</Text>
                     </View>
                 )}
             />
@@ -114,6 +107,7 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
         color: ColorsPalette.PrimaryColorDeep,
         marginBottom: 20,
+        fontFamily: "NunitoSans_10pt-Black",
     },
     imageContainer: {
         position: "relative",
@@ -136,11 +130,13 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
         color: ColorsPalette.PrimaryColorDeep,
         marginBottom: 10,
+        fontFamily: "NunitoSans_10pt-Black",
     },
     summary: {
         fontSize: 16,
         color: "#555",
         marginBottom: 20,
+        fontFamily: "NunitoSans_10pt-Regular",
     },
     phrasesContainer: {
         paddingTop: 10,
@@ -150,5 +146,6 @@ const styles = StyleSheet.create({
         color: ColorsPalette.SecondaryColorDeep,
         marginBottom: 8,
         fontWeight: "bold",
+        fontFamily: "NunitoSans_10pt-Black",
     },
 });

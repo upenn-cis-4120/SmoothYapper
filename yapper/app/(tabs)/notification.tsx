@@ -85,11 +85,13 @@ const styles = StyleSheet.create({
         color: ColorsPalette.PrimaryColorLight,
         marginBottom: 20,
         marginLeft: "10%",
+        fontFamily: "NunitoSans_10pt-Black",
     },
     menuContainer: {
         marginTop: 20,
         width: "90%",
         alignSelf: "center",
+        flexGrow: 1,
     },
     menuItem: {
         paddingVertical: 15,
@@ -105,26 +107,30 @@ const styles = StyleSheet.create({
     },
     menuText: {
         fontSize: 16,
-        color: "#002F5D",
+        color: ColorsPalette.PrimaryColorLight,
         fontWeight: "bold",
+        fontFamily: "NunitoSans_10pt-Black",
     },
     saveButton: {
         paddingVertical: 15,
-        backgroundColor: "#002F5D",
+        borderColor: ColorsPalette.PrimaryColorDeep,
+        borderWidth: 1,
         borderRadius: 8,
         alignItems: "center",
         width: "40%",
         alignSelf: "center",
     },
     saveButtonText: {
-        color: "#FFFFFF",
+        color: ColorsPalette.PrimaryColorDeep,
         fontWeight: "bold",
         fontSize: 16,
+        fontFamily: "NunitoSans_10pt-Black",
     },
     bottomButtons: {
         flexDirection: "row",
         justifyContent: "space-between",
         width: "80%",
         alignSelf: "center",
+        marginBottom: 20,
     },
 });

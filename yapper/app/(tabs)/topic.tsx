@@ -105,6 +105,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     color: "#001F54",
+    fontFamily: "NunitoSans_10pt-Black",
   },
   duration: {
     fontSize: 14,
@@ -129,9 +130,11 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#001F54",
     marginBottom: 8,
+    fontFamily: "NunitoSans_10pt-Black",
   },
   description: {
     fontSize: 14,
     color: "#555555",
+    fontFamily: "NunitoSans_10pt-Regular",
   },
 });

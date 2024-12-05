@@ -1,4 +1,4 @@
-import { SafeAreaView, Text, View, StyleSheet, Image, TouchableOpacity } from "react-native";
+import { SafeAreaView, Text, View, StyleSheet, Image, TouchableOpacity, Linking } from "react-native";
 
 import { ColorsPalette } from "@/constants/colors";
 import { router } from "expo-router";
@@ -44,6 +44,12 @@ export default function Setting() {
         }}>
           <Text style={styles.menuText}>Feedback</Text>
         </TouchableOpacity>
+        <TouchableOpacity style={styles.menuItem} onPress={()=> {
+          // Open a website using the default browser
+          Linking.openURL("https://seas.upenn.edu");  
+        }}>
+          <Text style={styles.menuText}>About</Text>
+        </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
@@ -62,6 +68,7 @@ const styles = StyleSheet.create({
     color: ColorsPalette.PrimaryColorLight,
     marginBottom: 20,
     marginLeft: "10%",
+    fontFamily: "NunitoSans_10pt-Black",
   },
   logoContainer: {
     alignItems: "center",
@@ -80,11 +87,13 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     color: ColorsPalette.SecondaryColorDeep,
+    fontFamily: "NunitoSans_10pt-Black",
   },
   logoSubText: {
     fontSize: 18,
     fontWeight: "bold",
     color: ColorsPalette.PrimaryColorLight,
+    fontFamily: "NunitoSans_10pt-Black",
     marginLeft: 5,
   },
   menuContainer: {
@@ -106,7 +115,8 @@ const styles = StyleSheet.create({
   },
   menuText: {
     fontSize: 16,
-    color: "#002F5D",
+    color: ColorsPalette.PrimaryColorLight,
     fontWeight: "bold",
+    fontFamily: "NunitoSans_10pt-Black",
   },
 });

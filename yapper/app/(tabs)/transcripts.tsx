@@ -33,7 +33,7 @@ function splitIntoSentences(content: string): SentenceType[] {
     return sentences.map((sentence, index) => ({
         index,
         content: sentence.trim(),
-        highlight:( Math.random() > 0.7),
+        highlight: true,
     }));
 }
 

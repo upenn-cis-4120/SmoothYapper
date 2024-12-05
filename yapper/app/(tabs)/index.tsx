@@ -127,5 +127,6 @@ const styles = StyleSheet.create({
       color: "#FFFFFF",
       marginTop: 8,
       textAlign: "center",
+      fontFamily: "NunitoSans_10pt-Black",
   },
 });

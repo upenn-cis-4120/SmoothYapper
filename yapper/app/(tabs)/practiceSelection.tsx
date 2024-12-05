@@ -179,7 +179,7 @@ const styles = StyleSheet.create({
     picker: {
         width: "100%",
         height: 150,
-        fontFamily: "NunitoSans_10pt-Regular",
+        fontFamily: "NunitoSans_10pt-Black",
     },
     pickerItem: {
         fontSize: 16,
