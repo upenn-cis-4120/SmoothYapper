@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Audio } from 'expo-av';
 
+import Logger from "@/components/Logger";
+
 type Props = {
     audioUri: string | undefined;
     setPlaying: React.Dispatch<React.SetStateAction<boolean>>;
@@ -10,15 +12,15 @@ type Props = {
 
 export default function AudioPlayer ( { audioUri, setPlaying, isSessionActive, setRecordAble} : Props) {
     const [sound, setSound] = useState<Audio.Sound | null>(null);
-    console.log('audioUri', audioUri);
-    console.log('isSessionActive', isSessionActive);
+    Logger.info('audioUri', audioUri);
+    Logger.info('isSessionActive', isSessionActive);
     useEffect( () => {
         const playAudio  = async () => {
-            console.log('Starting playAudio with audioUri:', audioUri);
+            Logger.info('Starting playAudio with audioUri:', audioUri);
             if(!audioUri || !isSessionActive) {
                 return;
             }
-            console.log('playing audio', audioUri);
+            Logger.info('playing audio', audioUri);
             if(sound) {
                 await sound.unloadAsync();
             }
@@ -33,7 +35,7 @@ export default function AudioPlayer ( { audioUri, setPlaying, isSessionActive, s
             // When the sound has finished playing, unload it and reset the state
             newSound.setOnPlaybackStatusUpdate((status) => {
                 if (status.isLoaded && status.didJustFinish) {
-                    console.log('Audio finished playing');
+                    Logger.info('Audio finished playing');
                     setRecordAble(true);
                     setPlaying(false);
                     newSound.unloadAsync();

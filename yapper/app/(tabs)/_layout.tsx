@@ -3,6 +3,7 @@ import { MaterialIcons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useTabContext } from "@/contexts/TabContext";
 
 const { ColorsPalette } = require("@/constants/colors.tsx");
+import Logger from "@/components/Logger";
 
 export default function TabLayout() {
     const tabContext = useTabContext();
@@ -10,7 +11,7 @@ export default function TabLayout() {
         throw new Error("useTabContext must be used within a TabProvider");
     }
     const { activeTab, setActiveTab } = tabContext;
-    const hideBarTabList = ["practice", "practiceResult", "transcripts", "improvement", "topicPage", "feedback", "profile", "notification"];
+    const hiddenTabsList = ["practice", "feedback", "improvement", "practiceResult", "transcripts", "topicPage", "profile", "notification"];
     
     return (
         <Tabs screenOptions={({route}) =>({
@@ -23,7 +24,21 @@ export default function TabLayout() {
                 backgroundColor: ColorsPalette.FullWhite,
                 height: 96,
                 borderTopWidth: 0,
-                display: hideBarTabList.includes(route.name) ? "none" : "flex",
+                display: hiddenTabsList.includes(route.name) ? "none" : "flex",
+            },
+            tabBarItemStyle: {
+                justifyContent: 'center',
+                alignItems: 'center',
+                // paddindVertical: 10,
+            },
+            tabBarLabelStyle: {
+                fontSize: 16,
+                fontFamily: 'NuunitoSans_10pt-Regular',
+                fontWeight: 300,
+            },
+            tabBarIconStyle: {
+                width: 64,
+                height: 64,
             },
         })}>
 
@@ -83,8 +98,7 @@ export default function TabLayout() {
                 name="practiceSelection" 
                 options={{
                     title: "Practice Seletcion",
-                    tabBarIcon: () => null,
-                    tabBarButton: () => null,
+                    href: null,
                 }}
             />
 
@@ -92,8 +106,7 @@ export default function TabLayout() {
                 name="practice"
                 options={{
                     title: "Practice",
-                    tabBarIcon: () => null,
-                    tabBarButton: () => null,
+                    href: null,
                 }}
             />
 
@@ -101,8 +114,7 @@ export default function TabLayout() {
                 name="practiceResult"
                 options={{
                     title: "Practice Result",
-                    tabBarIcon: () => null,
-                    tabBarButton: () => null,
+                    href: null,
                 }}
             />
 
@@ -110,8 +122,7 @@ export default function TabLayout() {
                 name="transcripts"
                 options={{
                     title: "Transcript",
-                    tabBarIcon: () => null,
-                    tabBarButton: () => null,
+                    href: null,
                 }}
             />
 
@@ -119,8 +130,7 @@ export default function TabLayout() {
                 name="improvement"
                 options={{
                     title: "Improvement",
-                    tabBarIcon: () => null,
-                    tabBarButton: () => null,
+                    href: null,
                 }}
             />
 
@@ -128,8 +138,7 @@ export default function TabLayout() {
                 name="topicPage"
                 options={{
                     title: "Topic Page",
-                    tabBarIcon: () => null,
-                    tabBarButton: () => null,
+                    href: null,
                 }}
             />
 
@@ -137,8 +146,7 @@ export default function TabLayout() {
                 name="feedback"
                 options={{
                     title: "Feedback",
-                    tabBarIcon: () => null,
-                    tabBarButton: () => null,
+                    href: null,
                 }}
             />
 
@@ -146,8 +154,7 @@ export default function TabLayout() {
                 name="profile"
                 options={{
                     title: "Profile",
-                    tabBarIcon: () => null,
-                    tabBarButton: () => null,
+                    href: null,
                 }}
             />
 
@@ -155,8 +162,7 @@ export default function TabLayout() {
                 name="notification"
                 options={{
                     title: "Notification",
-                    tabBarIcon: () => null,
-                    tabBarButton: () => null,
+                    href: null,
                 }}
             />
 

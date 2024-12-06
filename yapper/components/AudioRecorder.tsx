@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Audio } from "expo-av";
 
+import Logger from "@/components/Logger";
+
 type AudioRecorderProps = {
     // onSegmentRecorded: (audioUri: string) => void;
     // slienceDuration: number;
@@ -15,9 +17,9 @@ export default function AudioRecorder({ isRecording, setRecordingUri }: AudioRec
           const status = await Audio.requestPermissionsAsync();
           if (!status.granted) {
             alert('Permission to access microphone was denied');
-            console.log("Audio permissions denied");
+            Logger.info("Audio permissions denied");
           }
-          console.log("Audio permissions granted");
+          Logger.info("Audio permissions granted");
         })();
       }, []);
     
@@ -48,7 +50,7 @@ export default function AudioRecorder({ isRecording, setRecordingUri }: AudioRec
         try {
             await recording.stopAndUnloadAsync();
             const uri = recording.getURI();
-            console.log("Recording stopped and stored at", uri);
+            Logger.info("Recording stopped and stored at", uri);
             setRecording(null);
             if (uri && setRecordingUri) {
                 setRecordingUri(uri);
@@ -79,18 +81,18 @@ export default function AudioRecorder({ isRecording, setRecordingUri }: AudioRec
 
     useEffect(() => {
         if(isRecording) {
-            console.log("isRecording is true. Time to start recording");
+            Logger.info("isRecording is true. Time to start recording");
             startRecording();
-            console.log("Recording started");
+            Logger.info("Recording started");
         } else if (recording) {
-            console.log("isRecording is false. Time to stop recording");
+            Logger.info("isRecording is false. Time to stop recording");
             stopRecording();
-            console.log("Recording stopped");
+            Logger.info("Recording stopped");
         }
 
         // return () => {
         //     if(recording) {
-        //         console.log("The recorder is still recording, Recording stopped");
+        //         Logger.info("The recorder is still recording, Recording stopped");
         //         stopRecording();
         //     }
         // }

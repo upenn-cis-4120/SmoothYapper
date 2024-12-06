@@ -46,7 +46,7 @@ export default function Setting() {
         </TouchableOpacity>
         <TouchableOpacity style={styles.menuItem} onPress={()=> {
           // Open a website using the default browser
-          Linking.openURL("https://seas.upenn.edu");  
+          Linking.openURL("https://medium.com/@haozewu47/smooth-yapper-8459889075fd");  
         }}>
           <Text style={styles.menuText}>About</Text>
         </TouchableOpacity>

@@ -2,6 +2,8 @@ import { useEffect } from "react";
 import { View, StyleSheet, Text } from "react-native";
 
 import { ColorsPalette } from "@/constants/colors";
+import Logger from "@/components/Logger";
+
 type Props = {
     onPause: () => void;
     onResume: () => void;

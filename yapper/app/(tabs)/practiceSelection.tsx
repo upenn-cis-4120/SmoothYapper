@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { MaterialIcons } from "@expo/vector-icons";
 
 import ModelSelection from "@/components/ModelSelection";
-import { router, useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams, usePathname } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const { ColorsPalette } = require("@/constants/colors.tsx");
@@ -19,6 +19,8 @@ export default function PracticeSelection() {
         avatar: any;
         fullImage: any;
     } | undefined>(undefined);
+
+    Logger.info("Path Name:" , usePathname());
     
     const { scenario } = useLocalSearchParams();
 
@@ -91,6 +93,7 @@ export default function PracticeSelection() {
                                 setIsPickerVisible(false); // Close dropdown after selection
                             }}
                             style={styles.picker}
+                            itemStyle={styles.picker}
                         >
                             {scenarios.map((scenario, index) => (
                                 <Picker.Item
@@ -112,8 +115,8 @@ export default function PracticeSelection() {
             <TouchableOpacity
                 style={styles.playButton}
                 onPress={() => {
-                    console.log("Play button pressed");
-                    console.log(selectedModel);
+                    Logger.info("Play button pressed");
+                    Logger.info(selectedModel);
                     router.replace({
                         pathname: "/(tabs)/practice",
                         params: {
@@ -180,6 +183,7 @@ const styles = StyleSheet.create({
         width: "100%",
         height: 150,
         fontFamily: "NunitoSans_10pt-Black",
+        color: ColorsPalette.PrimaryColorLight,
     },
     pickerItem: {
         fontSize: 16,

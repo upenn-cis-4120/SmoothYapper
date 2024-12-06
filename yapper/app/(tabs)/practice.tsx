@@ -15,7 +15,7 @@ import Timer from "@/components/Timer";
 import Message from "@/components/Message";
 import AudioRecorder from "@/components/AudioRecorder";
 import AudioPlayer from "@/components/AudioPlayer";
-import logger from "@/components/Logger";
+import Logger from "@/components/Logger";
 
 import { Message as MessageType, Sentences as SentenceType } from "@/types/Message";
 
@@ -48,9 +48,10 @@ export default function Practice() {
     const { modelData, scenario } = useLocalSearchParams();
     const [ hintOpen, setHintOpen ] = useState(true);
     const [elapsedTime, setElapsedTime] = useState(0);
-    const [timerActive, setTimerActive] = useState(true);
+    const [timerActive, setTimerActive] = useState(false);
     const [isInitialMount, setIsInitialMount] = useState(true); 
     const parsedModel = JSON.parse(decodeURIComponent(typeof modelData === "string" ? modelData : modelData[0]));
+    Logger.info("Parsed Model: ", parsedModel);
     const hintContents = [
         "Current Scenario: " + scenario,
         "Pick a random topic and talk about it. When you are ready, press the record button to start recording.",
@@ -99,14 +100,65 @@ export default function Practice() {
         avatar: parsedModel.avatar,
     };
 
+    // const getSessionId = async () => {
+    //     Logger.info("Initiating session...");
+    //     Logger.info(`Scenario: ${scenario}`);
+    //     const response = await axios.post(`${baseURL}/initChat`, {
+    //         scenario : scenario,
+    //     });
+    //     if(!response.data.sessionId) {
+    //         logger.error("Session ID not found in response");
+    //         Alert.alert(
+    //             "Service Not Available",
+    //             "Please try again later",
+    //             [
+    //                 {
+    //                     text: "OK",
+    //                     onPress: () => {
+    //                         router.replace({
+    //                             pathname: "/(tabs)",
+    //                         });
+    //                     },
+    //                 },
+    //             ],
+    //             { cancelable: false }
+    //         );
+    //         return;
+    //     }
+    //     Logger.info(`Session inited, sessionId: ${response.data.sessionId}`);
+    //     sessionIdRef.current = response.data.sessionId;
+    // };
+
     const getSessionId = async () => {
-        logger.info("Initiating session...");
-        logger.info(`Scenario: ${scenario}`);
-        const response = await axios.post(`${baseURL}/initChat`, {
-            scenario : scenario,
-        });
-        logger.info(`Session inited, sessionId: ${response.data.sessionId}`);
-        sessionIdRef.current = response.data.sessionId;
+        try {
+            const response = await axios.post(`${baseURL}/initChat`, {
+                scenario: scenario,
+            });
+            if (response.status === 200) {
+                Logger.info(`Session inited, sessionId: ${response.data.sessionId}`);
+                sessionIdRef.current = response.data.sessionId;
+                setIsSessionActive(true);
+            } else {
+                throw new Error("Failed to initialize session");
+            }
+        } catch (error) {
+            setHintOpen(false);
+            Alert.alert(
+                "Initialization Failed",
+                "Failed to initialize the chat session. Please try again later.",
+                [
+                    {
+                        text: "OK",
+                        onPress: () => {
+                            router.replace({
+                                pathname: "/(tabs)",
+                            });
+                        },
+                    },
+                ],
+                { cancelable: false }
+            );
+        }
     };
 
     useFocusEffect(() => {
@@ -118,6 +170,7 @@ export default function Practice() {
             setElapsedTime(0);
             setTimerActive(false);
             setIsInitialMount(false);
+            setHintOpen(true);
             initSession();
         }
         return () => {};
@@ -141,8 +194,38 @@ export default function Practice() {
                     body: formData as any,
                 });
 
+                if(!response.ok) {
+                    console.error(`Transcription Error: ${response.text}`);
+                    Alert.alert(
+                        "Transcription Failed",
+                        "Please try again later",
+                        [
+                            {
+                                text: "OK",
+                                onPress: () => {
+                                    setElapsedTime(0);
+                                    setTimerActive(false);
+                                    setIsInitialMount(true);
+                                    setIsSessionActive(false);
+                                    setIsRecording(false);
+                                    setRecordAble(true);
+                                    setRecordingUri("");
+                                    setTtsAudioUri("");
+                                    setPlaying(false);
+                                    setMessages([]);
+                                    router.replace({
+                                        pathname: "/(tabs)",
+                                    });
+                                },
+                            },
+                        ],
+                        { cancelable: false }
+                    );
+                    return;
+                }
+
                 const transcription = await response.json();
-                logger.info(`Transcription: ${transcription.text}`);
+                Logger.info(`Transcription: ${transcription.text}`);
                 
                 const message: MessageType = {
                     id: messages.length+1,
@@ -158,7 +241,7 @@ export default function Practice() {
                     timestamp: new Date().toISOString(),
                     avatar: parsedModel.avatar,
                 };
-                logger.info(`Parsed Message: ${message}`);
+                Logger.info(`Parsed Message: ${message}`);
                 setTranscribing(false);
                 setMessages((prevMessages) => [...prevMessages, message]);
                 setLatestUserMessage(transcription.text);
@@ -189,12 +272,44 @@ export default function Practice() {
                 });
                 if(!textResponse.ok) {
                     const responseJson = await textResponse.json();
-                    logger.error(`Error ${responseJson.error.code}: ${responseJson.error.message}`);
+                    Logger.error(`Error ${responseJson.error.code}: ${responseJson.error.message}`);
+                    Alert.alert(
+                        "Response Generation Failed",
+                        "Please try again later",
+                        [
+                            {
+                                text: "OK",
+                                onPress: () => {
+                                    setElapsedTime(0);
+                                    setTimerActive(false);
+                                    setIsInitialMount(true);
+                                    setIsSessionActive(false);
+                                    setIsRecording(false);
+                                    setRecordAble(true);
+                                    setRecordingUri("");
+                                    setTtsAudioUri("");
+                                    setPlaying(false);
+                                    setMessages([]);
+                                    router.replace({
+                                        pathname: "/(tabs)",
+                                    });
+                                },
+                            },
+                        ],
+                        { cancelable: false }
+                    );
                     return;
                 }
                 const textResponseJson = await textResponse.json();
-                logger.info(`Text Response: ${textResponseJson.message}`);
-                
+                Logger.info(`Text Response: ${textResponseJson.message}`);
+                let voice = "alloy";
+                if(parsedModel.name === "Aaliyah") {
+                    voice = "shimmer";
+                } else if (parsedModel.name === "Lewis") {
+                    voice = "onyx";
+                } else if (parsedModel.name === "Kim") {
+                    voice = "fable";
+                }
                 const ttsResponse = await fetch(`${baseURL}/speech`, {
                     method: 'POST',
                     headers: {
@@ -202,10 +317,36 @@ export default function Practice() {
                     },
                     body: JSON.stringify({
                         text: textResponseJson.message,
+                        voice: voice,
                     }),
                 });
                 if(!ttsResponse.ok) {
                     console.error(`TTS Response Error: ${ttsResponse.text}`);
+                    Alert.alert(
+                        "Service Not Available",
+                        "Please try again later",
+                        [
+                            {
+                                text: "OK",
+                                onPress: () => {
+                                    setElapsedTime(0);
+                                    setTimerActive(false);
+                                    setIsInitialMount(true);
+                                    setIsSessionActive(false);
+                                    setIsRecording(false);
+                                    setRecordAble(true);
+                                    setRecordingUri("");
+                                    setTtsAudioUri("");
+                                    setPlaying(false);
+                                    setMessages([]);
+                                    router.replace({
+                                        pathname: "/(tabs)",
+                                    });
+                                },
+                            },
+                        ],
+                        { cancelable: false }
+                    );
                     return;
                 }
                 const ttsResponseJson = await ttsResponse.json();
@@ -214,7 +355,7 @@ export default function Practice() {
                 await FileSystem.writeAsStringAsync(fileUri, base64Audio, {
                     encoding: FileSystem.EncodingType.Base64,
                 });
-                console.log("Setting TTS Audio URI: ", fileUri);
+                Logger.info("Setting TTS Audio URI: ", fileUri);
                 setTtsAudioUri(fileUri);
                 // FIXME: The audio player is not playing the audio when reentering the practice after a seccion ends
                 // FIXME: The period symbols are missing at the end of each sentence
@@ -265,7 +406,7 @@ export default function Practice() {
                 autoHide: true,
                 topOffset: 80,
                 text1Style: {
-                    fontFamily: "NunitoSans-Variable",
+                    fontFamily: "NunitoSans_10pt-Black",
                     fontWeight: "800",
                     color: ColorsPalette.PrimaryColorLight,
                 },
@@ -276,12 +417,12 @@ export default function Practice() {
         } else {
             Toast.show({
                 type: 'info',
-                text1: 'Recording Resumed',
+                text1: 'Recording Started',
                 position: 'top',
                 autoHide: true,
                 topOffset: 80,
                 text1Style: {
-                    fontFamily: "NunitoSans-Variable",
+                    fontFamily: "NunitoSans_10pt-Black",
                     fontWeight: "800",
                     color: ColorsPalette.PrimaryColorLight,
                 },
@@ -307,7 +448,7 @@ export default function Practice() {
             <View style={styles.topBarWrapper}>
                <View style={styles.leftBarWrapper}>
                 <TouchableOpacity style={styles.outlinedButton} onPress={() => {
-                    console.log("Home button pressed");
+                    Logger.info("Home button pressed");
                     setElapsedTime(0);
                     setTimerActive(false);
                     setIsInitialMount(true);
@@ -325,7 +466,7 @@ export default function Practice() {
                         // The sessionId should be deleted when the user ends the whole practice 
                         // aftering viewing the results and feedback
                         // FIXME: Check the resources cleanning and the session cleanning, which leads to existing bugs in no sounds and bad session state
-                        console.log("End button pressed");
+                        Logger.info("End button pressed");
                         setElapsedTime(0);
                         setTimerActive(false);
                         setIsInitialMount(true);
@@ -357,13 +498,13 @@ export default function Practice() {
                <Timer 
                 isActive={timerActive}
                 onPause={() => {
-                    console.log("Pause button pressed");
+                    Logger.info("Pause button pressed");
                 }}
                 onResume={() => {
-                    console.log("Resume button pressed");
+                    Logger.info("Resume button pressed");
                 }}
                 onFinish={() => {
-                    console.log("Finish button pressed");
+                    Logger.info("Finish button pressed");
                 }}
                 elapsedTime={elapsedTime}
                 setElapsedTime={setElapsedTime}
@@ -420,7 +561,7 @@ export default function Practice() {
                 </View>
                 <View style={{ flex: 1, alignItems: 'flex-end' }}>
                     <TouchableOpacity onPress={() => {
-                        console.log("Hint button pressed");
+                        Logger.info("Hint button pressed");
                         setHintOpen(true);
                         setTimerActive(false);
                     }} style={styles.hintButton}>
@@ -429,9 +570,11 @@ export default function Practice() {
                 </View>
             </View>
             <HintModal isVisible= {hintOpen} hintContents={hintContents} onClose={() => {
-                console.log("Hint modal closed");
+                Logger.info("Hint modal closed");
                 setHintOpen(false);
-                setTimerActive(true);
+                if(!timerActive && !isInitialMount) {
+                    setTimerActive(true);
+                }
             }} />
             <Toast/>
         </SafeAreaView>

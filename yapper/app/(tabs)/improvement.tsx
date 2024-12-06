@@ -2,6 +2,7 @@ import { SafeAreaView, ScrollView, StyleSheet, Text, View, TouchableOpacity, Tou
 import { useLocalSearchParams, router } from "expo-router";
 
 const { ColorsPalette } = require("@/constants/colors.tsx");
+import Logger from "@/components/Logger";
 
 export default function Improvement() {
     const { sentence } = useLocalSearchParams();
@@ -24,15 +25,18 @@ export default function Improvement() {
             </ScrollView>
             <View style={styles.bottomBar}>
                 <TouchableOpacity style={styles.bottoms} onPress={() => {
-                    console.log("Try Again button pressed");
+                    Logger.info("Try Again button pressed");
                     router.replace({
                         pathname: "/(tabs)/practiceSelection",
+                        params: {
+                            scenario: "Social",
+                        }
                     });
                 }}>
                     <Text style={styles.buttonFonts}>Try Again</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.bottoms} onPress={() => {
-                    console.log("Home button pressed");
+                    Logger.info("Home button pressed");
                     router.replace({
                         pathname: "/(tabs)",
                     });
@@ -40,7 +44,7 @@ export default function Improvement() {
                     <Text  style={styles.buttonFonts}>Home</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.bottoms} onPress={() => {
-                    console.log("Return to Transcripts button pressed");
+                    Logger.info("Return to Transcripts button pressed");
                     router.replace({
                         pathname: "/(tabs)/transcripts",
                     });                     
@@ -56,8 +60,6 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: ColorsPalette.FullWhite,
-        padding: 10,
-        margin: 10,
         borderRadius: 8,
         alignItems: 'center',
     },

@@ -4,7 +4,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 
 const { ColorsPalette } = require("@/constants/colors.tsx");
 
-import logger from "@/components/Logger";
+import Logger from "@/components/Logger";
 
 type Props = {
     setSelectedModel: React.Dispatch<React.SetStateAction<{
@@ -61,19 +61,19 @@ const monkResponse = {
         [
             {
                 id: 1,
-                name: "Giannis",
+                name: "Damian",
                 favoriteFood: "Nuggets",
                 age: 29,
-                avatar: require('@/assets/images/cropped-tom.jpg'),
-                fullImage: require('@/assets/images/full-tom.jpg'),
+                avatar: require('@/assets/images/memoji-5.png'),
+                fullImage: require('@/assets/images//memoji-5.png'),
             },
             {
                 id: 2,
-                name: "Maxey",
+                name: "Tyrese",
                 favoriteFood: "CheeseSteak",
                 age: 24,
-                avatar: require('@/assets/images/cropped-doraemon.jpg'),
-                fullImage: require('@/assets/images/full-doraemon.jpg'),
+                avatar: require('@/assets/images//memoji-6.png'),
+                fullImage: require('@/assets/images//memoji-6.png'),
             },
         ]
 };

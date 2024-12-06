@@ -9,16 +9,17 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useEffect } from "react";
 
 import baseURL from "@/constants/baseURL";
+import Logger from "@/components/Logger";
 
 export default function PracticeResult() {
 
     const { modelData, practiceResultData, sessionId } = useLocalSearchParams();
-    console.log(`Model Data: ${modelData}`);
-    console.log(`Practice Result Data: ${practiceResultData}`);
-    console.log(`Sample Message Data: ${sessionId}`);
+    Logger.info(`Model Data: ${modelData}`);
+    Logger.info(`Practice Result Data: ${practiceResultData}`);
+    Logger.info(`Sample Message Data: ${sessionId}`);
     const parsedModel = JSON.parse(decodeURIComponent(typeof modelData === "string" ? modelData : modelData[0]));
     const parsedPracticeResult = JSON.parse(decodeURIComponent(typeof practiceResultData === "string" ? practiceResultData : practiceResultData[0]));
-    console.log(parsedPracticeResult);
+    Logger.info(parsedPracticeResult);
 
     return (
         <SafeAreaView style={styles.feedbackContainer}>
@@ -41,7 +42,7 @@ export default function PracticeResult() {
             </View>
             <View style={styles.feedbackButtonContainer}>
                 <TouchableOpacity style={styles.feedbackButtons} onPress={ () => {
-                    console.log(`Parsed model: ${parsedModel}`);
+                    Logger.info(`Parsed model: ${parsedModel}`);
                     router.replace({
                         pathname: "/(tabs)/transcripts",
                         params: {
@@ -56,6 +57,9 @@ export default function PracticeResult() {
                     () => {
                         router.replace({
                             pathname: "/(tabs)/practiceSelection",
+                            params: {
+                                scenario: "Social",
+                            }
                         });
                     }
                 }>
@@ -80,6 +84,7 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
+        backgroundColor: ColorsPalette.FullWhite,
     },
     feedbackTitle: {
         fontSize: 36,

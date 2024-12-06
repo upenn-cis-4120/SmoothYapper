@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, Alert } from "react-native";
 import { router } from "expo-router";
 import { ColorsPalette } from "@/constants/colors";
+import Logger from "@/components/Logger";
 
 export default function Feedback() {
     const [feedback, setFeedback] = useState("");
@@ -53,7 +54,6 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: ColorsPalette.FullWhite,
-        padding: 20,
     },
     header: {
         marginTop: 20,

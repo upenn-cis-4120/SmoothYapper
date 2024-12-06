@@ -1,6 +1,6 @@
-import { SafeAreaView, ScrollView, TouchableOpacity, View, Text } from "react-native";
+import { SafeAreaView, ScrollView, TouchableOpacity, View, Text, Alert } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import Message from "@/components/Message";
 import { useEffect } from "react";
@@ -9,8 +9,6 @@ import baseURL from "@/constants/baseURL";
 
 const { ColorsPalette } = require("@/constants/colors.tsx");
 import { Message as MessageType, Sentences as SentenceType } from "@/types/Message";
-
-
 
 function splitIntoSentences(content: string): SentenceType[] {
     // Regex to match sentence-ending symbols and retain them
@@ -39,24 +37,66 @@ function splitIntoSentences(content: string): SentenceType[] {
 
 
 export default function Transcripts() {
-    console.log("Transcripts Page");
+    Logger.info("Transcripts Page");
     const [transcribe, setTranscribe] = useState<MessageType[]>([]);
+    const sessionIdRef = useRef<string>();
     const { sessionId, modelAvatarLink } = useLocalSearchParams();
+    sessionIdRef.current = sessionId as string;
     const modelAvatar = modelAvatarLink as string;
     useEffect(() => {
         Logger.info("Transcript Page, loading session with id:", sessionId);
         Logger.info("Model Avatar Link:", modelAvatar);
+        if(sessionIdRef.current === undefined) {
+            return;
+        }
         const getTranscript = async () => {
             const response = await fetch(`${baseURL}/practice/${sessionId}`);
+            if(!response.ok) {
+                Logger.error("Failed to load transcript data");
+                Alert.alert(
+                    "Failed to load transcript data",
+                    "Please try again later",
+                    [
+                        {
+                            text: "OK",
+                            onPress: () => {
+                                router.replace({
+                                    pathname: "/(tabs)",
+                                });
+                            },
+                        },
+                    ],
+                    { cancelable: false }
+                );
+                return;
+            }
             const data = await response.json();
             Logger.info("Transcript Data:", data);
             
             const messages = parseMessagesToMessageArray(data);
-            setTranscribe(messages);
+            if(messages.length === 0) {
+                Alert.alert(
+                    "No messages found",
+                    "No messages found in the transcript data",
+                    [
+                        {
+                            text: "OK",
+                            onPress: () => {
+                                router.replace({
+                                    pathname: "/(tabs)",
+                                });
+                            },
+                        },
+                    ],
+                    { cancelable: false }
+                );
+            } else {
+                setTranscribe(messages);
+            }
         };
 
         getTranscript();
-    }, []);
+    }, [sessionIdRef.current]);
 
     function parseMessagesToMessageArray(data: any): MessageType[] {
         const messagesObject = data.messages;
@@ -91,15 +131,19 @@ export default function Transcripts() {
             </ScrollView>
             <View style={styles.bottomBar}>
                 <TouchableOpacity style={styles.bottoms} onPress={() => {
-                    console.log("Try Again button pressed");
+                    Logger.info("Try Again button pressed");
+                    setTranscribe([]);
                     router.replace({
                         pathname: "/(tabs)/practiceSelection",
+                        params: {
+                            scenario: "Social",
+                        }
                     });
                 }}>
                     <Text style={styles.buttonFonts}>Try Again</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.bottoms} onPress={() => {
-                    console.log("Home button pressed");
+                    Logger.info("Home button pressed");
                     // Clean up the session
                     setTranscribe([]);
                     router.replace({

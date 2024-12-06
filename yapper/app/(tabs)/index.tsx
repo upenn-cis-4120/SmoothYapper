@@ -8,6 +8,7 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { useTabContext } from '@/contexts/TabContext';
 
 const { ColorsPalette } = require("@/constants/colors.tsx");
+import Logger from "@/components/Logger";
 
 interface GridItem {
   title: string;
@@ -29,7 +30,7 @@ const GridItemComponent = ({ item, router }: { item: GridItem, router: any }) =>
       <TouchableOpacity
           style={[styles.gridItem, { backgroundColor: item.color }]}
           onPress={() => {
-              console.log(`Navigating to ${item.destination}`);
+              Logger.info(`Navigating to ${item.destination}`);
               router.replace({
                   pathname: `/(tabs)/${item.destination}`,
                   params: { scenario: item.title },
